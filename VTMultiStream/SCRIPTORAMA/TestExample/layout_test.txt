@@ -1,0 +1,510 @@
+    
+    NSString *videoPath1=[[NSBundle mainBundle] pathForResource:@"default_titles" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath1 = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath1 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath1 toPath:videoOverlaySrcPath1 error:nil];
+    NSURL * videoOverlaySrcURL1 = [NSURL fileURLWithPath:videoOverlaySrcPath1];
+    
+    NSString *videoPath2=[[NSBundle mainBundle] pathForResource:@"cartoon" ofType:@"m4v"];
+    NSString *videoOverlaySrcPath2 = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByDeletingPathExtension];
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByAppendingString:@"_2.mp4"];
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath2 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath2 toPath:videoOverlaySrcPath2 error:nil];
+    NSURL * videoOverlaySrcURL2 = [NSURL fileURLWithPath:videoOverlaySrcPath2];
+    
+    
+    
+    NSString * writerOutputPath = [videoOverlaySrcPath1 stringByDeletingLastPathComponent];
+    writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:@"MSComplement.mov"];
+    [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+    NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+    
+    
+    
+    VTMSDecomp  * stream1 = [[VTMSDecomp alloc] init];
+    {
+        [stream1 resetParameters];
+        stream1.sourceVideoURL = videoOverlaySrcURL1;
+        stream1.useOnlyDurations = NO;
+        stream1.useCacheArray = YES;
+        stream1.cacheArraySize = 2;
+        stream1.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        stream1.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+    }
+    
+    VTMSDecomp  * stream2 = [[VTMSDecomp alloc] init];
+    {
+        [stream2 resetParameters];
+        stream2.sourceVideoURL = videoOverlaySrcURL2;
+        stream2.useOnlyDurations = NO;
+        stream2.useCacheArray = YES;
+        stream2.cacheArraySize = 2;
+        stream2.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        stream2.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+    }
+    
+    VTMSComp * vtmsc = [[VTMSComp alloc] init];
+    {
+        [vtmsc resetParameters];
+        vtmsc.writerOutputURL = writerOutputURL;
+        vtmsc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtmsc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        vtmsc.compressionAverageBitRate = 1280000;
+        vtmsc.deleteOutputDirBeforeWrite = YES;
+        vtmsc.writerShouldOptimizeForNetworkUse = YES;
+        vtmsc.compSessionWidth = 1280.0;
+        vtmsc.compSessionHeight = 720.0;
+        GPUImageMSComplement * MSComplement = [[GPUImageMSComplement alloc] init];
+        [MSComplement useNextFrameForImageCapture];
+        MSComplement.mode = @"refpic";
+        GPUImagePicture * refpic = [[GPUImagePicture alloc] initWithImage:[UIImage imageNamed:@"layout_homocentric_squares_128.jpg"]];
+        [refpic addTarget:MSComplement atTextureLocation:2];
+        [refpic processImage];
+        [MSComplement useNextFrameForImageCapture];
+        vtmsc.initedFilter = MSComplement;
+        vtmsc.applyFilter  = YES;
+        vtmsc.SYNC = YES;
+        [vtmsc makeMSinit];
+        [vtmsc addDecompStream:stream1];
+        [vtmsc addDecompStream:stream2];
+        [vtmsc makeRecomp];
+        
+    }
+    
+
+
+
+
+///////////=======================>
+
+
+
+    ////
+    UVLocalRecordViewController * lrvc = (UVLocalRecordViewController *)self.delegate;
+    CDVideoObject * vobj = lrvc.taskObject.videos[0];
+    /*
+    ////pathForResource 获得的路径中的APPID 和
+    CDSceneObject * sobj = CDSceneObjectSyncCreatNewWithAllChildrenRelationShip(NO);
+    lrvc.taskObject.scene = sobj;
+    NSString * titlesPath = [[NSBundle mainBundle] pathForResource:@"default_titles" ofType:@"mp4"];
+    NSString * sceneTitlesPath = getSceneTitlesMovieFilePath(nil, vobj.makerId, nil, nil);
+    NSURL * sceneTitlesURL = [NSURL fileURLWithPath:sceneTitlesPath];
+    [[NSFileManager defaultManager] copyItemAtPath:titlesPath toPath:sceneTitlesPath error:nil];
+    sobj.titles.titlesURLstring = [sceneTitlesURL absoluteString];
+    
+    NSString * tailPath = [[NSBundle mainBundle] pathForResource:@"default_tail" ofType:@"mp4"];
+    NSString * sceneTailPath = getSceneTailMovieFilePath(nil, vobj.makerId, nil, nil);
+    NSURL * sceneTailURL = [NSURL fileURLWithPath:sceneTailPath];
+    [[NSFileManager defaultManager] copyItemAtPath:tailPath toPath:sceneTailPath error:nil];
+    sobj.tail.tailURLstring = [sceneTailURL absoluteString];
+    
+    
+
+    ////添加片头
+    NSMutableArray * srcMovieURLs = [[NSMutableArray alloc] init];
+    [srcMovieURLs addObject:[NSURL URLWithString:replaceAPPIDInABSURLString(sobj.titles.titlesURLstring,getCurrAPPIDInPath())]];
+    
+    
+    ////添加materials
+    for (int i = 0; i<lrvc.taskObject.videos.count; i++) {
+        CDVideoObject * vobj = lrvc.taskObject.videos[i];
+        NSURL * postFilterMovieURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vobj.videoLocalRender.postFilteringURLstring,getCurrAPPIDInPath())];
+        NSString * postTransMoviePath = getScenePostTransisionsMovieFilePath(vobj.videoId, vobj.makerId, nil, nil);
+        NSURL * postTransMovieURL = [NSURL fileURLWithPath:postTransMoviePath];
+        NSError * error;
+        [[NSFileManager defaultManager] copyItemAtURL:postFilterMovieURL toURL:postTransMovieURL error:&error];
+        [srcMovieURLs addObject:postTransMovieURL];
+    }
+    
+    ////添加片尾
+    [srcMovieURLs addObject:[NSURL URLWithString:replaceAPPIDInABSURLString(sobj.tail.tailURLstring,getCurrAPPIDInPath())]];
+
+
+    
+    ////第一步中的srcMovie 因为在videoLocalRender postFiltering 过程中被处理过了 ，所以都是只包含一个声轨 一个视频轨的
+    ////没有multiTracks 的
+    NSMutableArray * srcAudioURLs = [[NSMutableArray alloc] init];
+    NSMutableArray * srcVideoURLs = [[NSMutableArray alloc] init];
+    NSMutableArray * destAudioURLs = [[NSMutableArray alloc] init];
+    NSMutableArray * destVideoURLs = [[NSMutableArray alloc] init];
+    ////分离片头
+    {
+        NSURL * sourceMovieURL;
+        NSURL * destAudioDirURL;
+        NSURL * destVideoDirURL;
+        CDVideoObject * vobj = lrvc.taskObject.videos[0];
+        sourceMovieURL = (NSURL*)srcMovieURLs[0];
+
+        destAudioDirURL = [NSURL fileURLWithPath:getSceneTitlesAudioOnlyFileDir(vobj.makerId, nil)];
+        destVideoDirURL = [NSURL fileURLWithPath:getSceneTitlesVideoOnlyFileDir(vobj.makerId, nil)];
+        
+        [FileUitl deleteSpecificFilesOfSubDir:@"scene-titles" dirName:[destAudioDirURL path]];
+        [FileUitl deleteSpecificFilesOfSubDir:@"scene-titles" dirName:[destVideoDirURL path]];
+        NSMutableDictionary * rslt = splitMovieToFilesByTracksFromURL(sourceMovieURL, destAudioDirURL, destVideoDirURL, YES, NO);
+        destAudioURLs = [rslt valueForKey:@"audio"];
+        destVideoURLs = [rslt valueForKey:@"video"];
+        
+        
+        ////添加空轨
+        if (destAudioURLs) {
+            
+            
+        } else {
+            for (int j = 0; j<destVideoURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destVideoURLs[j]];
+                AVAssetTrack * vt = asset.tracks[0];
+                NSURL * destAudioURL =[NSURL fileURLWithPath: getSceneTitlesAudioOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(vt.timeRange, destAudioURL, YES, NO);
+                [destAudioURLs addObject:destAudioURL];
+            }
+        }
+        
+        
+        if (destVideoURLs) {
+            
+        } else {
+            for (int j = 0; j<destAudioURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destAudioURLs[j]];
+                AVAssetTrack * at = asset.tracks[0];
+                NSURL * destVideoURL =[NSURL fileURLWithPath: getSceneTitlesVideoOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(at.timeRange, destVideoURL, YES, NO);
+                [destVideoURLs addObject:destVideoURL];
+            }
+        }
+        ////添加空轨
+        
+        for (int j = 0; j<destAudioURLs.count; j++) {
+            [srcAudioURLs addObject:destAudioURLs[j]];
+        }
+        for (int j = 0; j<destVideoURLs.count; j++) {
+            [srcVideoURLs addObject:destVideoURLs[j]];
+        }
+        
+    }
+    
+    
+    for (int i = 1; i<srcMovieURLs.count -1; i++) {
+        NSURL * sourceMovieURL;
+        NSURL * destAudioDirURL;
+        NSURL * destVideoDirURL;
+        CDVideoObject * vobj = lrvc.taskObject.videos[i-1];
+        sourceMovieURL = (NSURL*)srcMovieURLs[i];
+        destAudioDirURL = [NSURL fileURLWithPath:getScenePostTransisionsAudioFileDir(vobj.makerId, nil)];
+        destVideoDirURL = [NSURL fileURLWithPath:getScenePostTransisionsVideoFileDir(vobj.makerId, nil)];
+        
+        
+        [FileUitl deleteSpecificFilesOfSubDir:vobj.videoId dirName:[destAudioDirURL path]];
+        [FileUitl deleteSpecificFilesOfSubDir:vobj.videoId dirName:[destVideoDirURL path]];
+        
+        
+        NSMutableDictionary * rslt = splitMovieToFilesByTracksFromURL(sourceMovieURL, destAudioDirURL, destVideoDirURL, YES, NO);
+        destAudioURLs = [rslt valueForKey:@"audio"];
+        destVideoURLs = [rslt valueForKey:@"video"];
+        
+        
+        ////添加空轨
+        if (destAudioURLs) {
+            
+            
+        } else {
+            for (int j = 0; j<destVideoURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destVideoURLs[j]];
+                AVAssetTrack * vt = asset.tracks[0];
+                NSURL * destAudioURL =[NSURL fileURLWithPath: getSceneTitlesAudioOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(vt.timeRange, destAudioURL, YES, NO);
+                [destAudioURLs addObject:destAudioURL];
+            }
+        }
+        
+        
+        if (destVideoURLs) {
+            
+        } else {
+            for (int j = 0; j<destAudioURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destAudioURLs[j]];
+                AVAssetTrack * at = asset.tracks[0];
+                NSURL * destVideoURL =[NSURL fileURLWithPath: getSceneTitlesVideoOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(at.timeRange, destVideoURL, YES, NO);
+                [destVideoURLs addObject:destVideoURL];
+            }
+        }
+        ////添加空轨
+        
+        for (int j = 0; j<destAudioURLs.count; j++) {
+            [srcAudioURLs addObject:destAudioURLs[j]];
+        }
+        for (int j = 0; j<destVideoURLs.count; j++) {
+            [srcVideoURLs addObject:destVideoURLs[j]];
+        }
+        
+    }
+    
+
+    
+    
+    ////分离片尾
+    
+    {
+        NSURL * sourceMovieURL;
+        NSURL * destAudioDirURL;
+        NSURL * destVideoDirURL;
+        CDVideoObject * vobj = lrvc.taskObject.videos[0];
+        sourceMovieURL = (NSURL*)srcMovieURLs[srcMovieURLs.count -1];
+        destAudioDirURL = [NSURL fileURLWithPath:getSceneTailAudioOnlyFileDir(vobj.makerId, nil)];
+        destVideoDirURL = [NSURL fileURLWithPath:getSceneTailVideoOnlyFileDir(vobj.makerId, nil)];
+        
+        [FileUitl deleteSpecificFilesOfSubDir:@"scene-tail" dirName:[destAudioDirURL path]];
+        [FileUitl deleteSpecificFilesOfSubDir:@"scene-tail" dirName:[destVideoDirURL path]];
+        NSMutableDictionary * rslt = splitMovieToFilesByTracksFromURL(sourceMovieURL, destAudioDirURL, destVideoDirURL, YES, NO);
+        destAudioURLs = [rslt valueForKey:@"audio"];
+        destVideoURLs = [rslt valueForKey:@"video"];
+        
+        
+        ////添加空轨
+        if (destAudioURLs) {
+            
+            
+        } else {
+            for (int j = 0; j<destVideoURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destVideoURLs[j]];
+                AVAssetTrack * vt = asset.tracks[0];
+                NSURL * destAudioURL =[NSURL fileURLWithPath: getSceneTitlesAudioOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(vt.timeRange, destAudioURL, YES, NO);
+                [destAudioURLs addObject:destAudioURL];
+            }
+        }
+        
+        
+        if (destVideoURLs) {
+            
+        } else {
+            for (int j = 0; j<destAudioURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destAudioURLs[j]];
+                AVAssetTrack * at = asset.tracks[0];
+                NSURL * destVideoURL =[NSURL fileURLWithPath: getSceneTitlesVideoOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(at.timeRange, destVideoURL, YES, NO);
+                [destVideoURLs addObject:destVideoURL];
+            }
+        }
+        ////添加空轨
+        
+        
+        for (int j = 0; j<destAudioURLs.count; j++) {
+            [srcAudioURLs addObject:destAudioURLs[j]];
+        }
+        for (int j = 0; j<destVideoURLs.count; j++) {
+            [srcVideoURLs addObject:destVideoURLs[j]];
+        }
+    }
+    
+
+    
+    
+    ////先concat  titles-transition-videoObj-transition-videoObj-transition-videoObj-transition-tail
+    ////片头, 处理过的videos,片尾 的urls
+    
+
+    ////是否有transitions
+    if (sobj.transitionModes && sobj.transitionSectionDurations) {
+        CDVideoObject * vobj = lrvc.taskObject.videos[0];
+        NSString * transitionsDirPath =  getSceneTransitionsFileDir(vobj.makerId, nil);
+        ////NSURL * transitionsDirURL = [NSURL fileURLWithPath:transitionsDirPath];
+        [FileUitl deleteSpecificFilesOfSubDir:@"" dirName:transitionsDirPath];
+        for (int i = 0 ; i<srcAudioURLs.count; i++) {
+            ////生成audio transitions
+        }
+        for (int i = 0 ; i<srcVideoURLs.count; i++) {
+            ////生成video transitions
+        }
+        ////要在当前SCENE/TRANSITIONS/ 文件夹下生成AUDIO  VIDEO两个文件夹
+        ////audioTransitions
+        ////videoTransotions
+    } else {
+        
+    }
+
+    ////concat titles,materails,tail  以及中间的transitions
+    */
+    
+    
+    
+    ////NSString *videoPath1=[[NSBundle mainBundle] pathForResource:@"default_titles" ofType:@"mp4"];
+    CDVideoLocalRenderObject * vlrobj = vobj.videoLocalRender;
+    NSURL * tempURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origVideoWorkDirURLstring,getCurrAPPIDInPath())];
+    NSString * tempPath = [tempURL path];
+    NSLog(@"tempPath:%@",tempPath);
+    NSMutableArray * tempArr = [FileUitl findSpecificFileURLsOfSubDir:@"mov" dirName:tempPath];
+    NSLog(@"tempArr:%@",tempArr);
+    
+    NSString *videoPath1 = [(NSURL*)tempArr[2] path];
+    NSString *videoOverlaySrcPath1 = getMaterialOverlaysVideoOnlyFilePath(0, vobj.videoId, vobj.makerId, nil, nil);
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath1 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath1 toPath:videoOverlaySrcPath1 error:nil];
+    NSURL * videoOverlaySrcURL1 = [NSURL fileURLWithPath:videoOverlaySrcPath1];
+    
+    NSString *videoPath2=[[NSBundle mainBundle] pathForResource:@"cartoon" ofType:@"m4v"];
+    NSString *videoOverlaySrcPath2 = getMaterialOverlaysVideoOnlyFilePath(0, vobj.videoId, vobj.makerId, nil, nil);
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByDeletingPathExtension];
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByAppendingString:@"_2.mp4"];
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath2 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath2 toPath:videoOverlaySrcPath2 error:nil];
+    NSURL * videoOverlaySrcURL2 = [NSURL fileURLWithPath:videoOverlaySrcPath2];
+    
+    
+    
+    NSString * writerOutputPath = [videoOverlaySrcPath1 stringByDeletingLastPathComponent];
+    writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:@"MSComplement.mov"];
+    [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+    NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+    
+    
+    
+    VTMSDecomp  * stream1 = [[VTMSDecomp alloc] init];
+    {
+        [stream1 resetParameters];
+        stream1.sourceVideoURL = videoOverlaySrcURL1;
+        stream1.useOnlyDurations = NO;
+        stream1.useCacheArray = YES;
+        stream1.cacheArraySize = 2;
+        stream1.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        stream1.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+    }
+    
+    VTMSDecomp  * stream2 = [[VTMSDecomp alloc] init];
+    {
+        [stream2 resetParameters];
+        stream2.sourceVideoURL = videoOverlaySrcURL2;
+        stream2.useOnlyDurations = NO;
+        stream2.useCacheArray = YES;
+        stream2.cacheArraySize = 2;
+        stream2.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        stream2.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+    }
+    
+    VTMSComp * vtmsc = [[VTMSComp alloc] init];
+    {
+        [vtmsc resetParameters];
+        vtmsc.writerOutputURL = writerOutputURL;
+        vtmsc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtmsc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        vtmsc.compressionAverageBitRate = 1280000;
+        vtmsc.deleteOutputDirBeforeWrite = YES;
+        vtmsc.writerShouldOptimizeForNetworkUse = YES;
+        vtmsc.compSessionWidth = 1280.0;
+        vtmsc.compSessionHeight = 720.0;
+        GPUImageMSComplement * MSComplement = [[GPUImageMSComplement alloc] init];
+        [MSComplement useNextFrameForImageCapture];
+        MSComplement.mode = @"refpic";
+        GPUImagePicture * refpic = [[GPUImagePicture alloc] initWithImage:[UIImage imageNamed:@"shia.jpg"]];
+        [refpic addTarget:MSComplement atTextureLocation:2];
+        [refpic processImage];
+        [MSComplement useNextFrameForImageCapture];
+        vtmsc.initedFilter = MSComplement;
+        vtmsc.applyFilter  = YES;
+        vtmsc.SYNC = YES;
+        vtmsc.writeToAlbum = YES;
+        [vtmsc makeMSinit];
+        [vtmsc addDecompStream:stream1];
+        [vtmsc addDecompStream:stream2];
+        [vtmsc makeRecomp];
+        
+    }
+    
+
+    
+    
+    
+===============>
+
+
+
+
+    
+    
+    ////NSString *videoPath1=[[NSBundle mainBundle] pathForResource:@"default_titles" ofType:@"mp4"];
+    CDVideoLocalRenderObject * vlrobj = vobj.videoLocalRender;
+    NSURL * tempURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origVideoWorkDirURLstring,getCurrAPPIDInPath())];
+    NSString * tempPath = [tempURL path];
+    NSLog(@"tempPath:%@",tempPath);
+    NSMutableArray * tempArr = [FileUitl findSpecificFileURLsOfSubDir:@"mov" dirName:tempPath];
+    NSLog(@"tempArr:%@",tempArr);
+    
+    NSString *videoPath1 = [(NSURL*)tempArr[2] path];
+    NSString *videoOverlaySrcPath1 = getMaterialOverlaysVideoOnlyFilePath(0, vobj.videoId, vobj.makerId, nil, nil);
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath1 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath1 toPath:videoOverlaySrcPath1 error:nil];
+    NSURL * videoOverlaySrcURL1 = [NSURL fileURLWithPath:videoOverlaySrcPath1];
+    
+    NSString *videoPath2=[[NSBundle mainBundle] pathForResource:@"cartoon" ofType:@"m4v"];
+    NSString *videoOverlaySrcPath2 = getMaterialOverlaysVideoOnlyFilePath(0, vobj.videoId, vobj.makerId, nil, nil);
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByDeletingPathExtension];
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByAppendingString:@"_2.mp4"];
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath2 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath2 toPath:videoOverlaySrcPath2 error:nil];
+    NSURL * videoOverlaySrcURL2 = [NSURL fileURLWithPath:videoOverlaySrcPath2];
+    
+    
+    
+    NSString * writerOutputPath = [videoOverlaySrcPath1 stringByDeletingLastPathComponent];
+    writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:@"MSComplement.mov"];
+    [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+    NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+    
+    
+    
+    VTMSDecomp  * stream1 = [[VTMSDecomp alloc] init];
+    {
+        [stream1 resetParameters];
+        stream1.sourceVideoURL = videoOverlaySrcURL1;
+        stream1.useOnlyDurations = NO;
+        stream1.useCacheArray = YES;
+        stream1.cacheArraySize = 2;
+        stream1.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        stream1.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+    }
+    
+    VTMSDecomp  * stream2 = [[VTMSDecomp alloc] init];
+    {
+        [stream2 resetParameters];
+        stream2.sourceVideoURL = videoOverlaySrcURL2;
+        stream2.useOnlyDurations = NO;
+        stream2.useCacheArray = YES;
+        stream2.cacheArraySize = 2;
+        stream2.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        stream2.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+    }
+    
+    VTMSComp * vtmsc = [[VTMSComp alloc] init];
+    {
+        [vtmsc resetParameters];
+        vtmsc.writerOutputURL = writerOutputURL;
+        vtmsc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtmsc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        vtmsc.compressionAverageBitRate = 1280000;
+        vtmsc.deleteOutputDirBeforeWrite = YES;
+        vtmsc.writerShouldOptimizeForNetworkUse = YES;
+        vtmsc.compSessionWidth = 1280.0;
+        vtmsc.compSessionHeight = 720.0;
+        GPUImageMSComplement * MSComplement = [[GPUImageMSComplement alloc] init];
+        [MSComplement useNextFrameForImageCapture];
+        MSComplement.mode = @"refpic";
+        GPUImagePicture * refpic = [[GPUImagePicture alloc] initWithImage:[UIImage imageNamed:@"shia.jpg"]];
+        [refpic addTarget:MSComplement atTextureLocation:2];
+        [refpic processImage];
+        [MSComplement useNextFrameForImageCapture];
+        vtmsc.initedFilter = MSComplement;
+        vtmsc.applyFilter  = YES;
+        vtmsc.SYNC = YES;
+        vtmsc.writeToAlbum = YES;
+        [vtmsc makeMSinit];
+        [vtmsc addDecompStream:stream1];
+        [vtmsc addDecompStream:stream2];
+        [vtmsc makeRecomp];
+        
+    }
+    
+
+    
+    
+

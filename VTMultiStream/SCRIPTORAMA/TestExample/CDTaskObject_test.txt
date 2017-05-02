@@ -1,0 +1,433 @@
+    
+    
+    
+
+    ////delegate是UVLocalRecordViewController
+    ////UVLocalRecordViewController的父类是UVRecordViewController
+    ////UVRecordViewController
+    /*
+    showCollectionView(self.collectionView);
+    showFetchedResultController(self.fetchedResultController);
+     */
+    UVLocalRecordViewController * lrvc = (UVLocalRecordViewController *)self.delegate;
+    
+    ////NSLog(@"self.delegate:%@",self.delegate);
+    ////NSLog(@"lrvc:%@",lrvc);
+    NSLog(@"lrvc.taskObject:%@",lrvc.taskObject);
+    NSLog(@"lrvc.taskObject.scene:%@",lrvc.taskObject.scene);
+    /*
+    NSLog(@"lrvc.sceneId:%@",lrvc.sceneId);
+    NSLog(@"lrvc.sceneModel:%@",lrvc.sceneModel);
+    NSLog(@"self:%@",self);
+    NSLog(@"lrvc.sourceVideoView:%@",lrvc.sourceVideoView);
+    */
+    ////CDSceneObjectCreatNewWithAllIteratedRelationships(NO);
+    /*
+    NSArray * sobjs = [CDSceneObject MR_findAll];
+    NSLog(@"sobjs:%@",sobjs);
+    for (int i = 0; i< sobjs.count; i++) {
+        NSLog(@"sobjs[%d]:%@",i,sobjs[i]);
+        CDSceneObjectPrint(sobjs[i]);
+        CDSceneObjectNullifyExceptRelationShip(sobjs[i], NO);
+        CDSceneObjectPrint(sobjs[i]);
+    }
+    */
+    deleteAllCDSceneObjects(YES);
+    
+    CDSceneObject * sobj = CDSceneObjectSyncCreatNewWithAllChildrenRelationShip(NO);
+    
+    CDSceneObjectPrint(sobj);
+    NSLog(@"----------------");
+    CDVideoTailObjectPrint(sobj.tail);
+    NSLog(@"----------------");
+    CDAudioSceneMusicObjectPrint(sobj.musicPostBGIntergration);
+    NSLog(@"----------------");
+    CDVideoTitlesObjectPrint(sobj.titles);
+    NSLog(@"----------------");
+    CDVideoLowerThirdObjectPrint(sobj.lowerThirdPostOverlay);
+    NSLog(@"----------------");
+    CDVideoTextOverBackGroundObjectPrint(sobj.textOverBG);
+    NSLog(@"----------------");
+    CDVideoOverlayObjectPrint(sobj.overlayPostCompositionFilter);
+    
+    
+    
+    
+    /*
+    NSArray * sobjs = [CDSceneObject MR_findAll];
+    NSLog(@"sobjs:%@",sobjs);
+    for (int i = 0; i< sobjs.count; i++) {
+        NSLog(@"sobjs[%d]:%@",i,sobjs[i]);
+        CDSceneObjectPrint(sobjs[i]);
+        ////CDSceneObjectNullifyExceptRelationShip(sobjs[i], NO);
+        ////CDSceneObjectPrint(sobjs[i]);
+    }
+    */
+    
+    NSLog(@"lrvc.taskObject:%@",lrvc.taskObject);
+    NSLog(@"lrvc.taskObject.scene:%@",lrvc.taskObject.scene);
+    
+    
+    CDTaskObjectUpdateSceneObject(lrvc.taskObject, sobj, YES);
+    
+    NSLog(@"lrvc.taskObject:%@",lrvc.taskObject);
+    NSLog(@"lrvc.taskObject.scene:%@",lrvc.taskObject.scene);
+    
+
+
+=============================================================================
+
+
+
+    ////delegate是UVLocalRecordViewController
+    ////UVLocalRecordViewController的父类是UVRecordViewController
+    ////UVRecordViewController
+    /*
+    showCollectionView(self.collectionView);
+    showFetchedResultController(self.fetchedResultController);
+     */
+    UVLocalRecordViewController * lrvc = (UVLocalRecordViewController *)self.delegate;
+    
+    ////NSLog(@"self.delegate:%@",self.delegate);
+    ////NSLog(@"lrvc:%@",lrvc);
+    ////NSLog(@"lrvc.taskObject:%@",lrvc.taskObject);
+    ////NSLog(@"lrvc.taskObject.scene:%@",lrvc.taskObject.scene);
+    /*
+    NSLog(@"lrvc.sceneId:%@",lrvc.sceneId);
+    NSLog(@"lrvc.sceneModel:%@",lrvc.sceneModel);
+    NSLog(@"self:%@",self);
+    NSLog(@"lrvc.sourceVideoView:%@",lrvc.sourceVideoView);
+    */
+    ////CDSceneObjectCreatNewWithAllIteratedRelationships(NO);
+    /*
+    NSArray * sobjs = [CDSceneObject MR_findAll];
+    NSLog(@"sobjs:%@",sobjs);
+    for (int i = 0; i< sobjs.count; i++) {
+        NSLog(@"sobjs[%d]:%@",i,sobjs[i]);
+        CDSceneObjectPrint(sobjs[i]);
+        CDSceneObjectNullifyExceptRelationShip(sobjs[i], NO);
+        CDSceneObjectPrint(sobjs[i]);
+    }
+    */
+    /*
+    deleteAllCDSceneObjects(YES);
+    
+    CDSceneObject * sobj = CDSceneObjectSyncCreatNewWithAllChildrenRelationShip(NO);
+    
+    CDSceneObjectPrint(sobj);
+    NSLog(@"----------------");
+    CDVideoTailObjectPrint(sobj.tail);
+    NSLog(@"----------------");
+    CDAudioSceneMusicObjectPrint(sobj.musicPostBGIntergration);
+    NSLog(@"----------------");
+    CDVideoTitlesObjectPrint(sobj.titles);
+    NSLog(@"----------------");
+    CDVideoLowerThirdObjectPrint(sobj.lowerThirdPostOverlay);
+    NSLog(@"----------------");
+    CDVideoTextOverBackGroundObjectPrint(sobj.textOverBG);
+    NSLog(@"----------------");
+    CDVideoOverlayObjectPrint(sobj.overlayPostCompositionFilter);
+    */
+    
+    
+    
+    /*
+    NSArray * sobjs = [CDSceneObject MR_findAll];
+    NSLog(@"sobjs:%@",sobjs);
+    for (int i = 0; i< sobjs.count; i++) {
+        NSLog(@"sobjs[%d]:%@",i,sobjs[i]);
+        CDSceneObjectPrint(sobjs[i]);
+        ////CDSceneObjectNullifyExceptRelationShip(sobjs[i], NO);
+        ////CDSceneObjectPrint(sobjs[i]);
+    }
+    */
+    /*
+    NSLog(@"lrvc.taskObject:%@",lrvc.taskObject);
+    NSLog(@"lrvc.taskObject.scene:%@",lrvc.taskObject.scene);
+    
+    
+    CDTaskObjectUpdateSceneObject(lrvc.taskObject, sobj, YES);
+    
+    NSLog(@"lrvc.taskObject:%@",lrvc.taskObject);
+    NSLog(@"lrvc.taskObject.scene:%@",lrvc.taskObject.scene);
+    */
+    NSLog(@"lrvc.taskObject.videos.count:%lu",lrvc.taskObject.videos.count);
+    
+    for (int i = 0; i<lrvc.taskObject.videos.count; i++) {
+        CDVideoObject * vobj = lrvc.taskObject.videos[i];
+        CDVideoObjectPrint(vobj);
+        NSLog(@"--------------------");
+    }
+
+===================================================================
+
+
+
+
+
+
+
+
+
+
+    
+    ////
+    UVLocalRecordViewController * lrvc = (UVLocalRecordViewController *)self.delegate;
+    CDVideoObject * vobj = lrvc.taskObject.videos[0];
+    ////pathForResource 获得的路径中的APPID 和
+    CDSceneObject * sobj = CDSceneObjectSyncCreatNewWithAllChildrenRelationShip(NO);
+    lrvc.taskObject.scene = sobj;
+    NSString * titlesPath = [[NSBundle mainBundle] pathForResource:@"default_titles" ofType:@"mp4"];
+    NSString * sceneTitlesPath = getSceneTitlesMovieFilePath(nil, vobj.makerId, nil, nil);
+    NSURL * sceneTitlesURL = [NSURL fileURLWithPath:sceneTitlesPath];
+    [[NSFileManager defaultManager] copyItemAtPath:titlesPath toPath:sceneTitlesPath error:nil];
+    sobj.titles.titlesURLstring = [sceneTitlesURL absoluteString];
+    
+    NSString * tailPath = [[NSBundle mainBundle] pathForResource:@"default_tail" ofType:@"mp4"];
+    NSString * sceneTailPath = getSceneTailMovieFilePath(nil, vobj.makerId, nil, nil);
+    NSURL * sceneTailURL = [NSURL fileURLWithPath:sceneTailPath];
+    [[NSFileManager defaultManager] copyItemAtPath:tailPath toPath:sceneTailPath error:nil];
+    sobj.tail.tailURLstring = [sceneTailURL absoluteString];
+    
+    
+
+    ////添加片头
+    NSMutableArray * srcMovieURLs = [[NSMutableArray alloc] init];
+    [srcMovieURLs addObject:[NSURL URLWithString:replaceAPPIDInABSURLString(sobj.titles.titlesURLstring,getCurrAPPIDInPath())]];
+    
+    
+    ////添加materials
+    for (int i = 0; i<lrvc.taskObject.videos.count; i++) {
+        CDVideoObject * vobj = lrvc.taskObject.videos[i];
+        NSURL * postFilterMovieURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vobj.videoLocalRender.postFilteringURLstring,getCurrAPPIDInPath())];
+        NSString * postTransMoviePath = getScenePostTransisionsMovieFilePath(vobj.videoId, vobj.makerId, nil, nil);
+        NSURL * postTransMovieURL = [NSURL fileURLWithPath:postTransMoviePath];
+        NSError * error;
+        [[NSFileManager defaultManager] copyItemAtURL:postFilterMovieURL toURL:postTransMovieURL error:&error];
+        [srcMovieURLs addObject:postTransMovieURL];
+    }
+    
+    ////添加片尾
+    [srcMovieURLs addObject:[NSURL URLWithString:replaceAPPIDInABSURLString(sobj.tail.tailURLstring,getCurrAPPIDInPath())]];
+
+
+    
+    ////第一步中的srcMovie 因为在videoLocalRender postFiltering 过程中被处理过了 ，所以都是只包含一个声轨 一个视频轨的
+    ////没有multiTracks 的
+    NSMutableArray * srcAudioURLs = [[NSMutableArray alloc] init];
+    NSMutableArray * srcVideoURLs = [[NSMutableArray alloc] init];
+    NSMutableArray * destAudioURLs = [[NSMutableArray alloc] init];
+    NSMutableArray * destVideoURLs = [[NSMutableArray alloc] init];
+    ////分离片头
+    {
+        NSURL * sourceMovieURL;
+        NSURL * destAudioDirURL;
+        NSURL * destVideoDirURL;
+        CDVideoObject * vobj = lrvc.taskObject.videos[0];
+        sourceMovieURL = (NSURL*)srcMovieURLs[0];
+
+        destAudioDirURL = [NSURL fileURLWithPath:getSceneTitlesAudioOnlyFileDir(vobj.makerId, nil)];
+        destVideoDirURL = [NSURL fileURLWithPath:getSceneTitlesVideoOnlyFileDir(vobj.makerId, nil)];
+        
+        [FileUitl deleteSpecificFilesOfSubDir:@"scene-titles" dirName:[destAudioDirURL path]];
+        [FileUitl deleteSpecificFilesOfSubDir:@"scene-titles" dirName:[destVideoDirURL path]];
+        NSMutableDictionary * rslt = splitMovieToFilesByTracksFromURL(sourceMovieURL, destAudioDirURL, destVideoDirURL, YES, NO);
+        destAudioURLs = [rslt valueForKey:@"audio"];
+        destVideoURLs = [rslt valueForKey:@"video"];
+        
+        
+        ////添加空轨
+        if (destAudioURLs) {
+            
+            
+        } else {
+            for (int j = 0; j<destVideoURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destVideoURLs[j]];
+                AVAssetTrack * vt = asset.tracks[0];
+                NSURL * destAudioURL =[NSURL fileURLWithPath: getSceneTitlesAudioOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(vt.timeRange, destAudioURL, YES, NO);
+                [destAudioURLs addObject:destAudioURL];
+            }
+        }
+        
+        
+        if (destVideoURLs) {
+            
+        } else {
+            for (int j = 0; j<destAudioURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destAudioURLs[j]];
+                AVAssetTrack * at = asset.tracks[0];
+                NSURL * destVideoURL =[NSURL fileURLWithPath: getSceneTitlesVideoOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(at.timeRange, destVideoURL, YES, NO);
+                [destVideoURLs addObject:destVideoURL];
+            }
+        }
+        ////添加空轨
+        
+        for (int j = 0; j<destAudioURLs.count; j++) {
+            [srcAudioURLs addObject:destAudioURLs[j]];
+        }
+        for (int j = 0; j<destVideoURLs.count; j++) {
+            [srcVideoURLs addObject:destVideoURLs[j]];
+        }
+        
+    }
+    
+    
+    for (int i = 1; i<srcMovieURLs.count -1; i++) {
+        NSURL * sourceMovieURL;
+        NSURL * destAudioDirURL;
+        NSURL * destVideoDirURL;
+        CDVideoObject * vobj = lrvc.taskObject.videos[i-1];
+        sourceMovieURL = (NSURL*)srcMovieURLs[i];
+        destAudioDirURL = [NSURL fileURLWithPath:getScenePostTransisionsAudioFileDir(vobj.makerId, nil)];
+        destVideoDirURL = [NSURL fileURLWithPath:getScenePostTransisionsVideoFileDir(vobj.makerId, nil)];
+        
+        
+        [FileUitl deleteSpecificFilesOfSubDir:vobj.videoId dirName:[destAudioDirURL path]];
+        [FileUitl deleteSpecificFilesOfSubDir:vobj.videoId dirName:[destVideoDirURL path]];
+        
+        
+        NSMutableDictionary * rslt = splitMovieToFilesByTracksFromURL(sourceMovieURL, destAudioDirURL, destVideoDirURL, YES, NO);
+        destAudioURLs = [rslt valueForKey:@"audio"];
+        destVideoURLs = [rslt valueForKey:@"video"];
+        
+        
+        ////添加空轨
+        if (destAudioURLs) {
+            
+            
+        } else {
+            for (int j = 0; j<destVideoURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destVideoURLs[j]];
+                AVAssetTrack * vt = asset.tracks[0];
+                NSURL * destAudioURL =[NSURL fileURLWithPath: getSceneTitlesAudioOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(vt.timeRange, destAudioURL, YES, NO);
+                [destAudioURLs addObject:destAudioURL];
+            }
+        }
+        
+        
+        if (destVideoURLs) {
+            
+        } else {
+            for (int j = 0; j<destAudioURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destAudioURLs[j]];
+                AVAssetTrack * at = asset.tracks[0];
+                NSURL * destVideoURL =[NSURL fileURLWithPath: getSceneTitlesVideoOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(at.timeRange, destVideoURL, YES, NO);
+                [destVideoURLs addObject:destVideoURL];
+            }
+        }
+        ////添加空轨
+        
+        for (int j = 0; j<destAudioURLs.count; j++) {
+            [srcAudioURLs addObject:destAudioURLs[j]];
+        }
+        for (int j = 0; j<destVideoURLs.count; j++) {
+            [srcVideoURLs addObject:destVideoURLs[j]];
+        }
+        
+    }
+    
+
+    
+    
+    ////分离片尾
+    
+    {
+        NSURL * sourceMovieURL;
+        NSURL * destAudioDirURL;
+        NSURL * destVideoDirURL;
+        CDVideoObject * vobj = lrvc.taskObject.videos[0];
+        sourceMovieURL = (NSURL*)srcMovieURLs[srcMovieURLs.count -1];
+        destAudioDirURL = [NSURL fileURLWithPath:getSceneTailAudioOnlyFileDir(vobj.makerId, nil)];
+        destVideoDirURL = [NSURL fileURLWithPath:getSceneTailVideoOnlyFileDir(vobj.makerId, nil)];
+        
+        [FileUitl deleteSpecificFilesOfSubDir:@"scene-tail" dirName:[destAudioDirURL path]];
+        [FileUitl deleteSpecificFilesOfSubDir:@"scene-tail" dirName:[destVideoDirURL path]];
+        NSMutableDictionary * rslt = splitMovieToFilesByTracksFromURL(sourceMovieURL, destAudioDirURL, destVideoDirURL, YES, NO);
+        destAudioURLs = [rslt valueForKey:@"audio"];
+        destVideoURLs = [rslt valueForKey:@"video"];
+        
+        
+        ////添加空轨
+        if (destAudioURLs) {
+            
+            
+        } else {
+            for (int j = 0; j<destVideoURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destVideoURLs[j]];
+                AVAssetTrack * vt = asset.tracks[0];
+                NSURL * destAudioURL =[NSURL fileURLWithPath: getSceneTitlesAudioOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(vt.timeRange, destAudioURL, YES, NO);
+                [destAudioURLs addObject:destAudioURL];
+            }
+        }
+        
+        
+        if (destVideoURLs) {
+            
+        } else {
+            for (int j = 0; j<destAudioURLs.count; j++) {
+                AVAsset * asset = [AVAsset assetWithURL:destAudioURLs[j]];
+                AVAssetTrack * at = asset.tracks[0];
+                NSURL * destVideoURL =[NSURL fileURLWithPath: getSceneTitlesVideoOnlyFilePath(j, vobj.videoId, vobj.makerId, nil, nil)];
+                creatEmptyAudioFileViaCMTimeRange(at.timeRange, destVideoURL, YES, NO);
+                [destVideoURLs addObject:destVideoURL];
+            }
+        }
+        ////添加空轨
+        
+        
+        for (int j = 0; j<destAudioURLs.count; j++) {
+            [srcAudioURLs addObject:destAudioURLs[j]];
+        }
+        for (int j = 0; j<destVideoURLs.count; j++) {
+            [srcVideoURLs addObject:destVideoURLs[j]];
+        }
+    }
+    
+
+    
+    
+    ////先concat  titles-transition-videoObj-transition-videoObj-transition-videoObj-transition-tail
+    ////片头, 处理过的videos,片尾 的urls
+    
+
+    ////是否有transitions
+    if (sobj.transitionModes && sobj.transitionSectionDurations) {
+        CDVideoObject * vobj = lrvc.taskObject.videos[0];
+        NSString * transitionsDirPath =  getSceneTransitionsFileDir(vobj.makerId, nil);
+        ////NSURL * transitionsDirURL = [NSURL fileURLWithPath:transitionsDirPath];
+        [FileUitl deleteSpecificFilesOfSubDir:@"" dirName:transitionsDirPath];
+        for (int i = 0 ; i<srcAudioURLs.count; i++) {
+            ////生成audio transitions
+        }
+        for (int i = 0 ; i<srcVideoURLs.count; i++) {
+            ////生成video transitions
+        }
+        ////要在当前SCENE/TRANSITIONS/ 文件夹下生成AUDIO  VIDEO两个文件夹
+        ////audioTransitions
+        ////videoTransotions
+    } else {
+        
+    }
+
+    ////concat titles,materails,tail  以及中间的transitions
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

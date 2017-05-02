@@ -1,0 +1,1068 @@
+    ////----test
+    CDVideoLocalRenderObject * vlrobj = self.videoObject.videoLocalRender;
+    
+    NSLog(@"CDVideoLocalRenderObject:%@",vlrobj);
+    
+    ////------
+    NSLog(@"self.videoObject.videoLocalRender.videoOverlay:%@",self.videoObject.videoLocalRender.videoOverlay);
+    NSString *videoPath=[[NSBundle mainBundle] pathForResource:@"default_overlay" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath = getMaterialOverlaysMovieFilePath(self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath toPath:videoOverlaySrcPath error:nil];
+    NSURL * videoOverlaySrcURL = [NSURL fileURLWithPath:videoOverlaySrcPath];
+    self.videoObject.videoLocalRender.videoOverlay.exist = [NSNumber numberWithBool:YES];
+    self.videoObject.videoLocalRender.videoOverlay.absoluteURLstring = [videoOverlaySrcURL absoluteString];
+    self.videoObject.videoLocalRender.videoOverlay.type = @"video";
+    self.videoObject.videoLocalRender.videoOverlay.startTime = [NSNumber numberWithFloat:0.0];
+    self.videoObject.videoLocalRender.videoOverlay.duration = [NSNumber numberWithFloat:21.0];
+    self.videoObject.videoLocalRender.videoOverlay.timeTrimingMode = @"tail";
+    self.videoObject.videoLocalRender.videoOverlay.timeFillingMode = @"repeat";
+    self.videoObject.videoLocalRender.videoOverlay.blendMode = @"normal";
+    self.videoObject.videoLocalRender.videoOverlay.width = [NSNumber numberWithFloat:328.0];
+    self.videoObject.videoLocalRender.videoOverlay.height = [NSNumber numberWithFloat:266.0];
+    NSMutableArray * pathPoints = [[NSMutableArray alloc] init];
+    NSMutableArray * movingSectionDurations = [[NSMutableArray alloc] init];
+    for (int i = 0; i < 11.0; i++) {
+        CGPoint pt = CGPointMake(128*i, 72*i);
+        [pathPoints addObject:[NSValue valueWithCGPoint:pt]];
+        [movingSectionDurations addObject:[NSNumber numberWithFloat:0.5]];
+    }
+    NSMutableDictionary * temp = splitMovingPathToXsAndYs(pathPoints);
+    self.videoObject.videoLocalRender.videoOverlay.movingPathCGpointXs = [temp valueForKey:@"X"];
+    self.videoObject.videoLocalRender.videoOverlay.movingPathCGpointYs = [temp valueForKey:@"Y"];
+    self.videoObject.videoLocalRender.videoOverlay.movingSectionDurations = movingSectionDurations;
+    
+    
+    ////-------
+
+    
+    
+    
+    
+    
+    ////A----分离语音和视频
+    NSURL * sourceMovieURL;
+    NSURL * destAudioDirURL;
+    NSURL * destVideoDirURL;
+    switch (vlrobj.video.sourceType) {
+        case(UVVideoSourceType_Record):
+        {
+            sourceMovieURL  =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origURLstring,getCurrAPPIDInPath())];
+            destAudioDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origAudioWorkDirURLstring,getCurrAPPIDInPath())];
+            destVideoDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origVideoWorkDirURLstring,getCurrAPPIDInPath())];
+            break;
+        }
+        case(UVVideoSourceType_Album):
+        {
+            sourceMovieURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumURLstring,getCurrAPPIDInPath())];
+            destAudioDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumAudioWorkDirURLstring,getCurrAPPIDInPath())];
+            destVideoDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumVideoWorkDirURLstring,getCurrAPPIDInPath())];
+            break;
+        }
+        default:
+        {
+            sourceMovieURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumURLstring,getCurrAPPIDInPath())];
+            destAudioDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumAudioWorkDirURLstring,getCurrAPPIDInPath())];
+            destVideoDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumVideoWorkDirURLstring,getCurrAPPIDInPath())];
+            break;
+        }
+    }
+    ////分离音频视频前 清理MOVIES/AUDIO/  和 MOVIES/VIDEO/ 下相应videoId的文件
+    [FileUitl deleteSpecificFilesOfSubDir:vlrobj.video.videoId dirName:[destAudioDirURL path]];
+    [FileUitl deleteSpecificFilesOfSubDir:vlrobj.video.videoId dirName:[destVideoDirURL path]];
+    NSMutableDictionary * rslt = splitMovieToFilesByTracksFromURL(sourceMovieURL, destAudioDirURL, destVideoDirURL, YES, NO);
+    NSMutableArray * destAudioURLs = [rslt valueForKey:@"audio"];
+    NSMutableArray * destVideoURLs = [rslt valueForKey:@"video"];
+    ////B---cutting, localRender的startTime 和 Duration 是从video信息获取的
+    ////然后自动填充
+    vlrobj.startTime = [NSNumber numberWithFloat:-1.0];
+    vlrobj.duration = [NSNumber numberWithFloat:-1.0];
+    if (vlrobj.video) {
+        vlrobj.startTime = [NSNumber numberWithFloat:vlrobj.video.startTime];
+        vlrobj.duration = [NSNumber numberWithFloat:(vlrobj.video.endTime - vlrobj.video.startTime)];
+    } else {
+        
+    }
+    AVAsset * someAsset = [AVAsset assetWithURL:sourceMovieURL];
+    float origLength = getTotalLengthOfMovieFromAsset(someAsset, 0, nil);
+    someAsset = NULL;
+    BOOL EXECCUTTING;
+    if (([vlrobj.startTime floatValue]<0) &&([vlrobj.duration floatValue]<0)) {
+        vlrobj.startTime = [NSNumber numberWithFloat:0.0];
+        vlrobj.duration = [NSNumber numberWithFloat:origLength];
+        EXECCUTTING = NO;
+    } else if([vlrobj.startTime floatValue]<0) {
+        vlrobj.startTime = [NSNumber numberWithFloat:0.0];
+        EXECCUTTING = YES;
+    } else {
+        EXECCUTTING = YES;
+    }
+    
+    ////上一步操作的destAudioURLs 和 destVideoURLs 是本次操作的源
+    ////savePostCutting
+    NSMutableArray * sourceAudioURLs =[[NSMutableArray alloc] init];
+    NSMutableArray * sourceVideoURLs =[[NSMutableArray alloc] init];
+    CMTime from;
+    CMTime to;
+    CMTimeRange timeRange;
+    ////为了后续逻辑简单 这里无论是否发生CUTTING,都会在
+    ////MOVIES_POST_CUTTING/AUDIO/ 和MOVIES_POST_CUTTING/VIDEO/
+    ////生成中间文件，不发生 CUTTING时只是copy
+    vlrobj.savePostCutting = [NSNumber numberWithBool:YES];
+    if (EXECCUTTING) {
+        for (int i = 0; i<destAudioURLs.count; i++) {
+            NSURL * audioSrcURL = destAudioURLs[i];
+            NSString * audioSrcPath = [audioSrcURL path];
+            NSURL * audioDstURL = getPostCuttingAudioOnlyURLFromAudioOnlyPath(audioSrcPath);
+            NSString * audioDstPath = [audioDstURL path];
+            [FileUitl deleteFile:audioDstPath];
+            AVAsset * asset = [AVAsset assetWithURL:audioSrcURL];
+            int timeScale = getTimeScaleFromAsset(asset, 0, @"audio");
+            from = CMTimeMakeWithSeconds([vlrobj.startTime floatValue], timeScale);
+            to = CMTimeMakeWithSeconds(([vlrobj.startTime floatValue] + [vlrobj.duration floatValue] ), timeScale);
+            rangeSingleTrackAudioToFileFromURL(audioSrcURL, audioDstURL, from, to, 0, YES, NO);
+            [sourceAudioURLs addObject:audioDstURL];
+        }
+        for (int i = 0; i<destVideoURLs.count; i++) {
+            NSURL * videoSrcURL = destVideoURLs[i];
+            NSString * videoSrcPath = [videoSrcURL path];
+            NSURL * videoDstURL = getPostCuttingVideoOnlyURLFromVideoOnlyPath(videoSrcPath);
+            NSString * videoDstPath = [videoDstURL path];
+            [FileUitl deleteFile:videoDstPath];
+            AVAsset * asset = [AVAsset assetWithURL:videoSrcURL];
+            int timeScale = getTimeScaleFromAsset(asset, 0, @"video");
+            from = CMTimeMakeWithSeconds([vlrobj.startTime floatValue], timeScale);
+            to = CMTimeMakeWithSeconds(([vlrobj.startTime floatValue] + [vlrobj.duration floatValue] ), timeScale);
+            rangeSingleTrackVideoToFileFromURL(videoSrcURL, videoDstURL, from, to, 0, YES, NO);
+            [sourceVideoURLs addObject:videoDstURL];
+            ////这里除了要处理图像还要更新postcutting thumbnail
+            NSURL * thumbnailURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origThumbnailURLstring, getCurrAPPIDInPath())];
+            NSString * thumbnailPath = [thumbnailURL path];
+            NSURL * postCuttingThumbnailURL = getPostCuttingThumbnailURLFromThumbnailPath(thumbnailPath,i);
+            NSString * postCuttingThumbnailPath = [postCuttingThumbnailURL path];
+            [FileUitl deleteFile:postCuttingThumbnailPath];
+            getSingleImageFromVideoURLWithCMTUnitIntervalAndSaveToURL(videoDstURL, kCMTimeZero, postCuttingThumbnailURL);
+            
+        }
+    } else {
+        for (int i = 0; i<destAudioURLs.count; i++) {
+            NSURL * audioSrcURL = destAudioURLs[i];
+            AVAsset * asset = [AVAsset assetWithURL:audioSrcURL];
+            int timeScale = getTimeScaleFromAsset(asset, 0, @"audio");
+            from = CMTimeMakeWithSeconds([vlrobj.startTime floatValue], timeScale);
+            to = CMTimeMakeWithSeconds(([vlrobj.startTime floatValue] + [vlrobj.duration floatValue] ), timeScale);
+            
+            NSString * audioSrcPath = [audioSrcURL path];
+            NSURL * audioDstURL = getPostCuttingAudioOnlyURLFromAudioOnlyPath(audioSrcPath);
+            NSString * audioDstPath = [audioDstURL path];
+            [FileUitl deleteFile:audioDstPath];
+            [[NSFileManager defaultManager] copyItemAtPath:audioSrcPath toPath:audioDstPath error:nil];
+            [sourceAudioURLs addObject:audioDstURL];
+            
+            
+        }
+        for (int i = 0; i<destVideoURLs.count; i++) {
+            NSURL * videoSrcURL = destVideoURLs[i];
+            AVAsset * asset = [AVAsset assetWithURL:videoSrcURL];
+            int timeScale = getTimeScaleFromAsset(asset, 0, @"video");
+            from = CMTimeMakeWithSeconds([vlrobj.startTime floatValue], timeScale);
+            to = CMTimeMakeWithSeconds(([vlrobj.startTime floatValue] + [vlrobj.duration floatValue] ), timeScale);
+            
+            NSString * videoSrcPath = [videoSrcURL path];
+            NSURL * videoDstURL = getPostCuttingVideoOnlyURLFromVideoOnlyPath(videoSrcPath);
+            NSString * videoDstPath = [videoDstURL path];
+            [FileUitl deleteFile:videoDstPath];
+            [[NSFileManager defaultManager] copyItemAtPath:videoSrcPath toPath:videoDstPath error:nil];
+            [sourceVideoURLs addObject:videoDstURL];
+            ////这里除了要处理图像还要更新postcutting thumbnail
+            NSURL * thumbnailURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origThumbnailURLstring, getCurrAPPIDInPath())];
+            NSString * thumbnailPath = [thumbnailURL path];
+            NSURL * postCuttingThumbnailURL = getPostCuttingThumbnailURLFromThumbnailPath(thumbnailPath,i);
+            NSString * postCuttingThumbnailPath = [postCuttingThumbnailURL path];
+            [FileUitl deleteFile:postCuttingThumbnailPath];
+            [[NSFileManager defaultManager] copyItemAtPath:thumbnailPath toPath:postCuttingThumbnailPath error:nil];
+        }
+    }
+    
+    timeRange = CMTimeRangeMake(from, CMTimeSubtract(to, from));
+    
+    CMTimeShow(from);
+    CMTimeShow(to);
+    CMTimeRangeShow(timeRange);
+    
+    
+    
+    
+    
+    ////C----上一个阶段完成后sourceAudioURLs 和  sourceVideoURLs
+    ////位于MOVIES_POST_CUTTING/AUDIO/  MOVIES_POST_CUTTING/VIDEO/
+    ////开始crop
+    ////workdir 使用postCutiingWorkDir
+    ////从sourceVideoURLs
+    if (vlrobj.cropSizeX &&
+        vlrobj.cropSizeY &&
+        vlrobj.cropPositionOnOriginalMaterialX &&
+        vlrobj.cropPositionOnOriginalMaterialY) {
+        ////crop 只针对video
+        for (int i = 0; i<sourceVideoURLs.count; i++) {
+            ////上一步之后video所在路径 /MOVIES_POST_CUTTING/VIDEO/下
+            NSURL * videoURL = (NSURL*)sourceVideoURLs[i];
+            NSString * videoPath = [videoURL path];
+            ////中间文件路径 /MOVIES_POST_CUTTING/VIDEO/下 名字加个_tmp
+            NSString * suffix = [videoPath pathExtension];
+            NSString * tmpCropPath = [videoPath stringByDeletingPathExtension];
+            tmpCropPath = [tmpCropPath stringByAppendingFormat:@"_tmp.%@",suffix];
+            NSURL * tmpCropURL = [NSURL fileURLWithPath:tmpCropPath];
+            [FileUitl deleteFile:tmpCropPath];
+            float widthCropTo = [vlrobj.cropSizeX floatValue];
+            float heightCropTo = [vlrobj.cropSizeY floatValue];
+            float topLeftPointX = [vlrobj.cropPositionOnOriginalMaterialX floatValue];
+            float topLeftPointY = [vlrobj.cropPositionOnOriginalMaterialY floatValue];
+            cropAndRangeVideoFromSourceURL(videoURL, 0, timeRange, tmpCropURL, CGSizeMake(widthCropTo,heightCropTo), CGPointMake(topLeftPointX,topLeftPointY), YES, NO);
+            ////完成crop后删除上一步的video,然后把新video move 到 上一步的video路径
+            [FileUitl deleteFile:videoPath];
+            [[NSFileManager defaultManager] moveItemAtPath:tmpCropPath toPath:videoPath error:nil];
+            ////这里除了要处理图像还要更新thumbnail,因为新的thumbnail要和track对应
+            ////所以无论之前是否savePostCutting,这里都要保存thumnail
+            NSURL * thumbnailURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origThumbnailURLstring, getCurrAPPIDInPath())];
+            NSString * thumbnailPath = [thumbnailURL path];
+            NSURL * postCropThumbnailURL;
+            postCropThumbnailURL = getPostCuttingThumbnailURLFromThumbnailPath(thumbnailPath,i);
+            NSString * postCropThumbnailPath = [postCropThumbnailURL path];
+            [FileUitl deleteFile:postCropThumbnailPath];
+            getSingleImageFromVideoURLWithCMTUnitIntervalAndSaveToURL(videoURL, kCMTimeZero, postCropThumbnailURL);
+        }
+    } else {
+        ////不发生crop,此时无变化
+    }
+    
+    ////D----filter
+    ////上一个阶段完成后sourceAudioURLs 和  sourceVideoURLs
+    ////依然位于MOVIES_POST_CUTTING/AUDIO/  MOVIES_POST_CUTTING/VIDEO/
+    ////为了后续逻辑简单 这里无论是否发生CUTTING,都会在
+    ////MOVIES_POST_FILTERING/AUDIO/ 和MOVIES_POST_FILTERING/VIDEO/
+    ////生成中间文件，不发生FILTERING时只是copy
+    for (int i = 0; i<sourceAudioURLs.count; i++) {
+        ////暂时不支持音频滤镜功能，所以音频只是简单copy
+        NSURL * srcAudioURL = (NSURL*)sourceAudioURLs[i];
+        NSString * srcAudioPath = [srcAudioURL path];
+        NSURL * origAudioURL = destAudioURLs[i];
+        NSString * origAudioPath = [origAudioURL path];
+        NSURL * postFilterAudioURL = getPostFilteringAudioOnlyURLFromAudioOnlyPath(origAudioPath);
+        NSString * postFilterAudioPath = [postFilterAudioURL path];
+        [FileUitl deleteFile:postFilterAudioPath];
+        [[NSFileManager defaultManager] copyItemAtPath:srcAudioPath toPath:postFilterAudioPath error:nil];
+        [sourceAudioURLs replaceObjectAtIndex:i withObject:postFilterAudioURL];
+    }
+    for (int i = 0; i<sourceVideoURLs.count; i++) {
+        NSURL * srcVideoURL = (NSURL*)sourceVideoURLs[i];
+        NSString * srcVideoPath = [srcVideoURL path];
+        NSURL * origVideoURL = destVideoURLs[i];
+        NSString * origVideoPath = [origVideoURL path];
+        NSURL * postFilterVideoURL = getPostFilteringVideoOnlyURLFromVideoOnlyPath(origVideoPath);
+        NSString * postFilterVideoPath = [postFilterVideoURL path];
+        [FileUitl deleteFile:postFilterVideoPath];
+        if (vlrobj.filter!=NULL) {
+            applyGPUImageFilterToVideoAndWait(srcVideoURL, postFilterVideoURL, vlrobj.filter, NULL);
+        } else {
+            [[NSFileManager defaultManager] copyItemAtPath:srcVideoPath toPath:postFilterVideoPath error:nil];
+        }
+        [sourceVideoURLs replaceObjectAtIndex:i withObject:postFilterVideoURL];
+        
+        ////这里除了要处理图像还要更新thumbnail,因为新的thumbnail要和track对应
+        ////所以无论之前是否savePostCutting,这里都要保存thumnail
+        NSURL * thumbnailURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origThumbnailURLstring, getCurrAPPIDInPath())];
+        NSString * thumbnailPath = [thumbnailURL path];
+        NSURL * postFilteringThumbnailURL;
+        postFilteringThumbnailURL = getPostFilteringThumbnailURLFromThumbnailPath(thumbnailPath, i);
+        NSString * postFilteringThumbnailPath = [postFilteringThumbnailURL path];
+        [FileUitl deleteFile:postFilteringThumbnailPath];
+        getSingleImageFromVideoURLWithCMTUnitIntervalAndSaveToURL(postFilterVideoURL, kCMTimeZero, postFilteringThumbnailURL);
+        
+    }
+
+    ////resize,到标准大小，这样接下来和videoOverlay合成的时候，就不需要考虑scale的事情
+    for (int i = 0; i<sourceVideoURLs.count; i++) {
+        NSURL * srcVideoURL = (NSURL*)sourceVideoURLs[i];
+        NSString * srcVideoPath = [srcVideoURL path];
+        ////中间文件路径 /MOVIES_POST_FILTERING/VIDEO/下 名字加个_tmp
+        NSString * suffix = [srcVideoPath pathExtension];
+        NSString * tmpScalePath = [srcVideoPath stringByDeletingPathExtension];
+        tmpScalePath = [tmpScalePath stringByAppendingFormat:@"_tmp.%@",suffix];
+        NSURL * tmpScaleURL = [NSURL fileURLWithPath:tmpScalePath];
+        [FileUitl deleteFile:tmpScalePath];
+        if (vlrobj.postRenderSizeX && vlrobj.postRenderSizeY) {
+            
+        } else {
+            vlrobj.postRenderSizeX = [NSNumber numberWithFloat:1280.0];
+            vlrobj.postRenderSizeY = [NSNumber numberWithFloat:720.0];
+        }
+        resizeVideoFromSourceURL(srcVideoURL, i, tmpScaleURL, CGSizeMake([vlrobj.postRenderSizeX floatValue],[vlrobj.postRenderSizeY floatValue]), YES, NO);
+        [FileUitl deleteFile:srcVideoPath];
+        [[NSFileManager defaultManager] moveItemAtPath:tmpScalePath toPath:srcVideoPath error:nil];
+    }
+ 
+    
+    ////------
+    NSLog(@"vlrobj.videoOverlay:%@",vlrobj.videoOverlay);
+    CDVideoOverlayObjectPrint(vlrobj.videoOverlay);
+    ////------
+    
+    
+    ////------
+    NSLog(@"vlrobj.videoOverlay:%@",vlrobj.videoOverlay);
+    CDVideoOverlayObjectPrint(vlrobj.videoOverlay);
+    ////------
+    
+    
+    if (vlrobj.videoOverlay) {
+        NSLog(@"pre-handling-of-vlrobj.videoOverlay");
+        CDVideoOverlayObjectStateOneProcessingFlow(vlrobj.videoOverlay, YES, YES);
+        
+        ////合成
+        ////把自己的video和overlay合成
+        for (int i = 0; i<sourceVideoURLs.count; i++) {
+            NSURL * srcVideoURL = (NSURL*)sourceVideoURLs[i];
+            NSString * srcVideoPath = [srcVideoURL path];
+            ////中间文件路径 /MOVIES_POST_FILTERING/VIDEO/下 名字加个_tmp
+            NSString * suffix = [srcVideoPath pathExtension];
+            NSString * tmpMergePath = [srcVideoPath stringByDeletingPathExtension];
+            tmpMergePath = [tmpMergePath stringByAppendingFormat:@"_tmp.%@",suffix];
+            NSURL * tmpMergeURL = [NSURL fileURLWithPath:tmpMergePath];
+            [FileUitl deleteFile:tmpMergePath];
+            NSLog(@"srcVideoURL:%@",srcVideoURL);
+            ////overlay合成
+            
+            NSMutableArray * movingPathCGpointXs  = vlrobj.videoOverlay.movingPathCGpointXs;
+            NSMutableArray * movingPathCGpointYs  = vlrobj.videoOverlay.movingPathCGpointYs;
+            NSMutableArray * movingSectionDurations = vlrobj.videoOverlay.movingSectionDurations;
+            NSMutableArray * pathPoints;
+            if (movingPathCGpointXs && movingPathCGpointYs) {
+                
+            } else {
+                [movingPathCGpointXs addObject:[NSNumber numberWithFloat:0.0]];
+                [movingPathCGpointYs addObject:[NSNumber numberWithFloat:0.0]];
+                movingSectionDurations= NULL;
+            }
+            pathPoints = reconstructMovingPath(movingPathCGpointXs, movingPathCGpointYs);
+            
+            NSLog(@"pathPoints:%@",pathPoints);
+            NSLog(@"movingSectionDurations:%@",movingSectionDurations);
+            
+            ////这里需要把带速度的轨迹点分段集合 重新构造成一组匀速的点，因为overlayVideoFilesToSingleTrackVideoFile
+            ////不支持带速度，想反应速度只能分割
+            ////例如 4.0====2sec======6.0  需要在中间插入一个点变成 4.0==1sec==5.0 5.0==1sec==6.0
+            NSMutableArray * newPathPoints;
+            newPathPoints = toAverageSpeedMovingPathPoints(pathPoints, movingSectionDurations);
+            
+            
+ 
+            NSLog(@"newPathPoints:%@",newPathPoints);
+            
+            
+            NSMutableArray * mergeVideoURLs = [[NSMutableArray alloc] init];
+            ////注:这一步，因为目前这个功能还是用 AVFoundation实现的，黑色背景的视频与原视频合成AVF依赖opacity效果不理想
+            ////所以这一步使用overlayVideoFilesToSingleTrackVideoFile处理
+            ////
+            int typeNum = blendTypeToEnum(vlrobj.videoOverlay.blendMode);
+            ////当前只支持normal,也就是overlay在video上面
+            switch (typeNum) {
+                case blendModeType_Normal:
+                {
+                    [mergeVideoURLs addObject:[NSURL URLWithString: vlrobj.videoOverlay.absoluteURLstring]];
+                    [mergeVideoURLs addObject:srcVideoURL];
+                    break;
+                }
+                case blendModeType_MSAdd:
+                {
+                    [mergeVideoURLs addObject:[NSURL URLWithString: vlrobj.videoOverlay.absoluteURLstring]];
+                    [mergeVideoURLs addObject:srcVideoURL];
+                    break;
+                }
+                default:
+                {
+                    [mergeVideoURLs addObject:[NSURL URLWithString: vlrobj.videoOverlay.absoluteURLstring]];
+                    [mergeVideoURLs addObject:srcVideoURL];
+                    break;
+                }
+            }
+            
+            NSLog(@"mergeVideoURLs:%@",mergeVideoURLs);
+            NSLog(@"newPathPoints:%@",newPathPoints);
+            NSLog(@"tmpMergeURL:%@",tmpMergeURL);
+            NSLog(@"typeNum:%d:%d",typeNum,blendModeType_Normal);
+            
+            NSMutableArray * atTimes = [[NSMutableArray alloc] init];
+            [atTimes addObject:vlrobj.videoOverlay.startTime];
+            [atTimes addObject:[NSNumber numberWithFloat:0.0]];
+            
+
+            
+            
+            NSLog(@"atTimes:%@",atTimes);
+            
+            NSMutableArray * pathPointsArray = [[NSMutableArray alloc] init];
+            [pathPointsArray addObject:newPathPoints];
+            [pathPointsArray addObject:[NSNull null]];
+            
+            
+            
+            
+            
+            
+            switch (typeNum) {
+                case blendModeType_Normal:
+                {
+                    overlayVideoFilesToSingleTrackVideoFile(mergeVideoURLs,pathPointsArray,atTimes, tmpMergeURL, YES, NO);
+                    break;
+                }
+                case blendModeType_MSAdd:
+                {
+                    overlayVideoFilesWithMSAddModeSYNC(srcVideoURL, [NSURL URLWithString: vlrobj.videoOverlay.absoluteURLstring], tmpMergeURL, [vlrobj.postRenderSizeX floatValue], [vlrobj.postRenderSizeY floatValue], 1280000);
+                    break;
+                }
+                default:
+                {
+                    overlayVideoFilesToSingleTrackVideoFile(mergeVideoURLs,pathPointsArray,atTimes, tmpMergeURL, YES, NO);
+                    break;
+                }
+            }
+            
+            [FileUitl deleteFile:srcVideoPath];
+            [[NSFileManager defaultManager] moveItemAtPath:tmpMergePath toPath:srcVideoPath error:nil];
+            
+            
+        }
+        
+    } else { }
+    
+    
+    
+    ////最终合成
+    ////所有处理过的音轨,视轨，合成一个movie
+    ////把自己的videos audios 一起合成movie
+    ////其实合成有很多种情况,首先多video轨道 因为大多播放器不支持暂时不考虑
+    ////多音频在这里先合成了一个音轨
+    ////也就是说目前只保留第一个视频轨道(通常播放器也只能播放第一个)
+    ////其次无论原文件有多少条音轨，最后都合并成一条,下面规则::
+    ////
+    //// <video only keep one>
+    //// <audio all in one>
+    ////
+    ////{
+    ////----把多个音频文件合成一个音频文件的多条track
+    ////void combineAudioFilesToMultiTracksAudioFile(NSMutableArray*sourceAudioURLs,NSURL * destAudioURL, BOOL SYNC,BOOL SAVETOALBUM);
+    ////----把多个视频文件removePT合成一个视频文件的多条track,apple  not support write multiTracks to a file
+    ////----to implement this  you must  use trackGroup  per track/per trackgroup
+    ////----AVAssetTrackGroup是一组track，同时只能播放其中一条track，但是不同的AVAssetTrackGroup中的track可以同时播放
+    ////void combineVideoFilesToMultiTracksVideoFile(NSMutableArray*sourceVideoURLs,NSURL * destVideoURL, BOOL SYNC,BOOL SAVETOALBUM);
+    //// 上面这两个功能步在这里使用，避免繁杂的逻辑
+    ////}
+    NSString * finalSingleMoviePath = getPostFilteringMovieFilePath(vlrobj.video.videoId, vlrobj.video.makerId, nil, nil);
+    NSURL * finalSingleMovieURL = [NSURL fileURLWithPath:finalSingleMoviePath];
+    [FileUitl deleteFile:finalSingleMoviePath];
+    combineMultiSingleTrackAudioFilesAndMultiSingleTrackVideoFilesToMovieFile(sourceAudioURLs, sourceVideoURLs,finalSingleMovieURL, YES, NO);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>
+
+
+
+
+
+
+    ////----test
+    CDVideoLocalRenderObject * vlrobj = self.videoObject.videoLocalRender;
+    
+    NSLog(@"CDVideoLocalRenderObject:%@",vlrobj);
+    
+    ////------
+    NSLog(@"self.videoObject.videoLocalRender.videoOverlay:%@",self.videoObject.videoLocalRender.videoOverlay);
+    NSString *videoPath=[[NSBundle mainBundle] pathForResource:@"default_overlay" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath = getMaterialOverlaysMovieFilePath(self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath toPath:videoOverlaySrcPath error:nil];
+    NSURL * videoOverlaySrcURL = [NSURL fileURLWithPath:videoOverlaySrcPath];
+    self.videoObject.videoLocalRender.videoOverlay.exist = [NSNumber numberWithBool:YES];
+    self.videoObject.videoLocalRender.videoOverlay.absoluteURLstring = [videoOverlaySrcURL absoluteString];
+    self.videoObject.videoLocalRender.videoOverlay.type = @"video";
+    self.videoObject.videoLocalRender.videoOverlay.startTime = [NSNumber numberWithFloat:0.0];
+    self.videoObject.videoLocalRender.videoOverlay.duration = [NSNumber numberWithFloat:21.0];
+    self.videoObject.videoLocalRender.videoOverlay.timeTrimingMode = @"tail";
+    self.videoObject.videoLocalRender.videoOverlay.timeFillingMode = @"repeat";
+    self.videoObject.videoLocalRender.videoOverlay.blendMode = @"normal";
+    self.videoObject.videoLocalRender.videoOverlay.width = [NSNumber numberWithFloat:328.0];
+    self.videoObject.videoLocalRender.videoOverlay.height = [NSNumber numberWithFloat:266.0];
+    NSMutableArray * pathPoints = [[NSMutableArray alloc] init];
+    NSMutableArray * movingSectionDurations = [[NSMutableArray alloc] init];
+    for (int i = 0; i < 11.0; i++) {
+        CGPoint pt = CGPointMake(128*i, 72*i);
+        [pathPoints addObject:[NSValue valueWithCGPoint:pt]];
+        [movingSectionDurations addObject:[NSNumber numberWithFloat:0.5]];
+    }
+    NSMutableDictionary * temp = splitMovingPathToXsAndYs(pathPoints);
+    self.videoObject.videoLocalRender.videoOverlay.movingPathCGpointXs = [temp valueForKey:@"X"];
+    self.videoObject.videoLocalRender.videoOverlay.movingPathCGpointYs = [temp valueForKey:@"Y"];
+    self.videoObject.videoLocalRender.videoOverlay.movingSectionDurations = movingSectionDurations;
+    
+    
+    ////-------
+
+    
+    
+    
+    
+    
+    ////A----分离语音和视频
+    NSURL * sourceMovieURL;
+    NSURL * destAudioDirURL;
+    NSURL * destVideoDirURL;
+    switch (vlrobj.video.sourceType) {
+        case(UVVideoSourceType_Record):
+        {
+            sourceMovieURL  =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origURLstring,getCurrAPPIDInPath())];
+            destAudioDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origAudioWorkDirURLstring,getCurrAPPIDInPath())];
+            destVideoDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origVideoWorkDirURLstring,getCurrAPPIDInPath())];
+            break;
+        }
+        case(UVVideoSourceType_Album):
+        {
+            sourceMovieURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumURLstring,getCurrAPPIDInPath())];
+            destAudioDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumAudioWorkDirURLstring,getCurrAPPIDInPath())];
+            destVideoDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumVideoWorkDirURLstring,getCurrAPPIDInPath())];
+            break;
+        }
+        default:
+        {
+            sourceMovieURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumURLstring,getCurrAPPIDInPath())];
+            destAudioDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumAudioWorkDirURLstring,getCurrAPPIDInPath())];
+            destVideoDirURL =  [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origFromAlbumVideoWorkDirURLstring,getCurrAPPIDInPath())];
+            break;
+        }
+    }
+    ////分离音频视频前 清理MOVIES/AUDIO/  和 MOVIES/VIDEO/ 下相应videoId的文件
+    [FileUitl deleteSpecificFilesOfSubDir:vlrobj.video.videoId dirName:[destAudioDirURL path]];
+    [FileUitl deleteSpecificFilesOfSubDir:vlrobj.video.videoId dirName:[destVideoDirURL path]];
+    NSMutableDictionary * rslt = splitMovieToFilesByTracksFromURL(sourceMovieURL, destAudioDirURL, destVideoDirURL, YES, NO);
+    NSMutableArray * destAudioURLs = [rslt valueForKey:@"audio"];
+    NSMutableArray * destVideoURLs = [rslt valueForKey:@"video"];
+    ////B---cutting, localRender的startTime 和 Duration 是从video信息获取的
+    ////然后自动填充
+    vlrobj.startTime = [NSNumber numberWithFloat:-1.0];
+    vlrobj.duration = [NSNumber numberWithFloat:-1.0];
+    if (vlrobj.video) {
+        vlrobj.startTime = [NSNumber numberWithFloat:vlrobj.video.startTime];
+        vlrobj.duration = [NSNumber numberWithFloat:(vlrobj.video.endTime - vlrobj.video.startTime)];
+    } else {
+        
+    }
+    AVAsset * someAsset = [AVAsset assetWithURL:sourceMovieURL];
+    float origLength = getTotalLengthOfMovieFromAsset(someAsset, 0, nil);
+    someAsset = NULL;
+    BOOL EXECCUTTING;
+    if (([vlrobj.startTime floatValue]<0) &&([vlrobj.duration floatValue]<0)) {
+        vlrobj.startTime = [NSNumber numberWithFloat:0.0];
+        vlrobj.duration = [NSNumber numberWithFloat:origLength];
+        EXECCUTTING = NO;
+    } else if([vlrobj.startTime floatValue]<0) {
+        vlrobj.startTime = [NSNumber numberWithFloat:0.0];
+        EXECCUTTING = YES;
+    } else {
+        EXECCUTTING = YES;
+    }
+    
+    ////上一步操作的destAudioURLs 和 destVideoURLs 是本次操作的源
+    ////savePostCutting
+    NSMutableArray * sourceAudioURLs =[[NSMutableArray alloc] init];
+    NSMutableArray * sourceVideoURLs =[[NSMutableArray alloc] init];
+    CMTime from;
+    CMTime to;
+    CMTimeRange timeRange;
+    ////为了后续逻辑简单 这里无论是否发生CUTTING,都会在
+    ////MOVIES_POST_CUTTING/AUDIO/ 和MOVIES_POST_CUTTING/VIDEO/
+    ////生成中间文件，不发生 CUTTING时只是copy
+    vlrobj.savePostCutting = [NSNumber numberWithBool:YES];
+    if (EXECCUTTING) {
+        for (int i = 0; i<destAudioURLs.count; i++) {
+            NSURL * audioSrcURL = destAudioURLs[i];
+            NSString * audioSrcPath = [audioSrcURL path];
+            NSURL * audioDstURL = getPostCuttingAudioOnlyURLFromAudioOnlyPath(audioSrcPath);
+            NSString * audioDstPath = [audioDstURL path];
+            [FileUitl deleteFile:audioDstPath];
+            AVAsset * asset = [AVAsset assetWithURL:audioSrcURL];
+            int timeScale = getTimeScaleFromAsset(asset, 0, @"audio");
+            from = CMTimeMakeWithSeconds([vlrobj.startTime floatValue], timeScale);
+            to = CMTimeMakeWithSeconds(([vlrobj.startTime floatValue] + [vlrobj.duration floatValue] ), timeScale);
+            rangeSingleTrackAudioToFileFromURL(audioSrcURL, audioDstURL, from, to, 0, YES, NO);
+            [sourceAudioURLs addObject:audioDstURL];
+        }
+        for (int i = 0; i<destVideoURLs.count; i++) {
+            NSURL * videoSrcURL = destVideoURLs[i];
+            NSString * videoSrcPath = [videoSrcURL path];
+            NSURL * videoDstURL = getPostCuttingVideoOnlyURLFromVideoOnlyPath(videoSrcPath);
+            NSString * videoDstPath = [videoDstURL path];
+            [FileUitl deleteFile:videoDstPath];
+            AVAsset * asset = [AVAsset assetWithURL:videoSrcURL];
+            int timeScale = getTimeScaleFromAsset(asset, 0, @"video");
+            from = CMTimeMakeWithSeconds([vlrobj.startTime floatValue], timeScale);
+            to = CMTimeMakeWithSeconds(([vlrobj.startTime floatValue] + [vlrobj.duration floatValue] ), timeScale);
+            rangeSingleTrackVideoToFileFromURL(videoSrcURL, videoDstURL, from, to, 0, YES, NO);
+            [sourceVideoURLs addObject:videoDstURL];
+            ////这里除了要处理图像还要更新postcutting thumbnail
+            NSURL * thumbnailURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origThumbnailURLstring, getCurrAPPIDInPath())];
+            NSString * thumbnailPath = [thumbnailURL path];
+            NSURL * postCuttingThumbnailURL = getPostCuttingThumbnailURLFromThumbnailPath(thumbnailPath,i);
+            NSString * postCuttingThumbnailPath = [postCuttingThumbnailURL path];
+            [FileUitl deleteFile:postCuttingThumbnailPath];
+            getSingleImageFromVideoURLWithCMTUnitIntervalAndSaveToURL(videoDstURL, kCMTimeZero, postCuttingThumbnailURL);
+            
+        }
+    } else {
+        for (int i = 0; i<destAudioURLs.count; i++) {
+            NSURL * audioSrcURL = destAudioURLs[i];
+            AVAsset * asset = [AVAsset assetWithURL:audioSrcURL];
+            int timeScale = getTimeScaleFromAsset(asset, 0, @"audio");
+            from = CMTimeMakeWithSeconds([vlrobj.startTime floatValue], timeScale);
+            to = CMTimeMakeWithSeconds(([vlrobj.startTime floatValue] + [vlrobj.duration floatValue] ), timeScale);
+            
+            NSString * audioSrcPath = [audioSrcURL path];
+            NSURL * audioDstURL = getPostCuttingAudioOnlyURLFromAudioOnlyPath(audioSrcPath);
+            NSString * audioDstPath = [audioDstURL path];
+            [FileUitl deleteFile:audioDstPath];
+            [[NSFileManager defaultManager] copyItemAtPath:audioSrcPath toPath:audioDstPath error:nil];
+            [sourceAudioURLs addObject:audioDstURL];
+            
+            
+        }
+        for (int i = 0; i<destVideoURLs.count; i++) {
+            NSURL * videoSrcURL = destVideoURLs[i];
+            AVAsset * asset = [AVAsset assetWithURL:videoSrcURL];
+            int timeScale = getTimeScaleFromAsset(asset, 0, @"video");
+            from = CMTimeMakeWithSeconds([vlrobj.startTime floatValue], timeScale);
+            to = CMTimeMakeWithSeconds(([vlrobj.startTime floatValue] + [vlrobj.duration floatValue] ), timeScale);
+            
+            NSString * videoSrcPath = [videoSrcURL path];
+            NSURL * videoDstURL = getPostCuttingVideoOnlyURLFromVideoOnlyPath(videoSrcPath);
+            NSString * videoDstPath = [videoDstURL path];
+            [FileUitl deleteFile:videoDstPath];
+            [[NSFileManager defaultManager] copyItemAtPath:videoSrcPath toPath:videoDstPath error:nil];
+            [sourceVideoURLs addObject:videoDstURL];
+            ////这里除了要处理图像还要更新postcutting thumbnail
+            NSURL * thumbnailURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origThumbnailURLstring, getCurrAPPIDInPath())];
+            NSString * thumbnailPath = [thumbnailURL path];
+            NSURL * postCuttingThumbnailURL = getPostCuttingThumbnailURLFromThumbnailPath(thumbnailPath,i);
+            NSString * postCuttingThumbnailPath = [postCuttingThumbnailURL path];
+            [FileUitl deleteFile:postCuttingThumbnailPath];
+            [[NSFileManager defaultManager] copyItemAtPath:thumbnailPath toPath:postCuttingThumbnailPath error:nil];
+        }
+    }
+    
+    timeRange = CMTimeRangeMake(from, CMTimeSubtract(to, from));
+    
+    CMTimeShow(from);
+    CMTimeShow(to);
+    CMTimeRangeShow(timeRange);
+    
+    
+    
+    
+    
+    ////C----上一个阶段完成后sourceAudioURLs 和  sourceVideoURLs
+    ////位于MOVIES_POST_CUTTING/AUDIO/  MOVIES_POST_CUTTING/VIDEO/
+    ////开始crop
+    ////workdir 使用postCutiingWorkDir
+    ////从sourceVideoURLs
+    if (vlrobj.cropSizeX &&
+        vlrobj.cropSizeY &&
+        vlrobj.cropPositionOnOriginalMaterialX &&
+        vlrobj.cropPositionOnOriginalMaterialY) {
+        ////crop 只针对video
+        for (int i = 0; i<sourceVideoURLs.count; i++) {
+            ////上一步之后video所在路径 /MOVIES_POST_CUTTING/VIDEO/下
+            NSURL * videoURL = (NSURL*)sourceVideoURLs[i];
+            NSString * videoPath = [videoURL path];
+            ////中间文件路径 /MOVIES_POST_CUTTING/VIDEO/下 名字加个_tmp
+            NSString * suffix = [videoPath pathExtension];
+            NSString * tmpCropPath = [videoPath stringByDeletingPathExtension];
+            tmpCropPath = [tmpCropPath stringByAppendingFormat:@"_tmp.%@",suffix];
+            NSURL * tmpCropURL = [NSURL fileURLWithPath:tmpCropPath];
+            [FileUitl deleteFile:tmpCropPath];
+            float widthCropTo = [vlrobj.cropSizeX floatValue];
+            float heightCropTo = [vlrobj.cropSizeY floatValue];
+            float topLeftPointX = [vlrobj.cropPositionOnOriginalMaterialX floatValue];
+            float topLeftPointY = [vlrobj.cropPositionOnOriginalMaterialY floatValue];
+            cropAndRangeVideoFromSourceURL(videoURL, 0, timeRange, tmpCropURL, CGSizeMake(widthCropTo,heightCropTo), CGPointMake(topLeftPointX,topLeftPointY), YES, NO);
+            ////完成crop后删除上一步的video,然后把新video move 到 上一步的video路径
+            [FileUitl deleteFile:videoPath];
+            [[NSFileManager defaultManager] moveItemAtPath:tmpCropPath toPath:videoPath error:nil];
+            ////这里除了要处理图像还要更新thumbnail,因为新的thumbnail要和track对应
+            ////所以无论之前是否savePostCutting,这里都要保存thumnail
+            NSURL * thumbnailURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origThumbnailURLstring, getCurrAPPIDInPath())];
+            NSString * thumbnailPath = [thumbnailURL path];
+            NSURL * postCropThumbnailURL;
+            postCropThumbnailURL = getPostCuttingThumbnailURLFromThumbnailPath(thumbnailPath,i);
+            NSString * postCropThumbnailPath = [postCropThumbnailURL path];
+            [FileUitl deleteFile:postCropThumbnailPath];
+            getSingleImageFromVideoURLWithCMTUnitIntervalAndSaveToURL(videoURL, kCMTimeZero, postCropThumbnailURL);
+        }
+    } else {
+        ////不发生crop,此时无变化
+    }
+    
+    ////D----filter
+    ////上一个阶段完成后sourceAudioURLs 和  sourceVideoURLs
+    ////依然位于MOVIES_POST_CUTTING/AUDIO/  MOVIES_POST_CUTTING/VIDEO/
+    ////为了后续逻辑简单 这里无论是否发生CUTTING,都会在
+    ////MOVIES_POST_FILTERING/AUDIO/ 和MOVIES_POST_FILTERING/VIDEO/
+    ////生成中间文件，不发生FILTERING时只是copy
+    for (int i = 0; i<sourceAudioURLs.count; i++) {
+        ////暂时不支持音频滤镜功能，所以音频只是简单copy
+        NSURL * srcAudioURL = (NSURL*)sourceAudioURLs[i];
+        NSString * srcAudioPath = [srcAudioURL path];
+        NSURL * origAudioURL = destAudioURLs[i];
+        NSString * origAudioPath = [origAudioURL path];
+        NSURL * postFilterAudioURL = getPostFilteringAudioOnlyURLFromAudioOnlyPath(origAudioPath);
+        NSString * postFilterAudioPath = [postFilterAudioURL path];
+        [FileUitl deleteFile:postFilterAudioPath];
+        [[NSFileManager defaultManager] copyItemAtPath:srcAudioPath toPath:postFilterAudioPath error:nil];
+        [sourceAudioURLs replaceObjectAtIndex:i withObject:postFilterAudioURL];
+    }
+    for (int i = 0; i<sourceVideoURLs.count; i++) {
+        NSURL * srcVideoURL = (NSURL*)sourceVideoURLs[i];
+        NSString * srcVideoPath = [srcVideoURL path];
+        NSURL * origVideoURL = destVideoURLs[i];
+        NSString * origVideoPath = [origVideoURL path];
+        NSURL * postFilterVideoURL = getPostFilteringVideoOnlyURLFromVideoOnlyPath(origVideoPath);
+        NSString * postFilterVideoPath = [postFilterVideoURL path];
+        [FileUitl deleteFile:postFilterVideoPath];
+        if (vlrobj.filter!=NULL) {
+            applyGPUImageFilterToVideoAndWait(srcVideoURL, postFilterVideoURL, vlrobj.filter, NULL);
+        } else {
+            [[NSFileManager defaultManager] copyItemAtPath:srcVideoPath toPath:postFilterVideoPath error:nil];
+        }
+        [sourceVideoURLs replaceObjectAtIndex:i withObject:postFilterVideoURL];
+        
+        ////这里除了要处理图像还要更新thumbnail,因为新的thumbnail要和track对应
+        ////所以无论之前是否savePostCutting,这里都要保存thumnail
+        NSURL * thumbnailURL = [NSURL URLWithString:replaceAPPIDInABSURLString(vlrobj.origThumbnailURLstring, getCurrAPPIDInPath())];
+        NSString * thumbnailPath = [thumbnailURL path];
+        NSURL * postFilteringThumbnailURL;
+        postFilteringThumbnailURL = getPostFilteringThumbnailURLFromThumbnailPath(thumbnailPath, i);
+        NSString * postFilteringThumbnailPath = [postFilteringThumbnailURL path];
+        [FileUitl deleteFile:postFilteringThumbnailPath];
+        getSingleImageFromVideoURLWithCMTUnitIntervalAndSaveToURL(postFilterVideoURL, kCMTimeZero, postFilteringThumbnailURL);
+        
+    }
+
+    ////resize,到标准大小，这样接下来和videoOverlay合成的时候，就不需要考虑scale的事情
+    for (int i = 0; i<sourceVideoURLs.count; i++) {
+        NSURL * srcVideoURL = (NSURL*)sourceVideoURLs[i];
+        NSString * srcVideoPath = [srcVideoURL path];
+        ////中间文件路径 /MOVIES_POST_FILTERING/VIDEO/下 名字加个_tmp
+        NSString * suffix = [srcVideoPath pathExtension];
+        NSString * tmpScalePath = [srcVideoPath stringByDeletingPathExtension];
+        tmpScalePath = [tmpScalePath stringByAppendingFormat:@"_tmp.%@",suffix];
+        NSURL * tmpScaleURL = [NSURL fileURLWithPath:tmpScalePath];
+        [FileUitl deleteFile:tmpScalePath];
+        if (vlrobj.postRenderSizeX && vlrobj.postRenderSizeY) {
+            
+        } else {
+            vlrobj.postRenderSizeX = [NSNumber numberWithFloat:1280.0];
+            vlrobj.postRenderSizeY = [NSNumber numberWithFloat:720.0];
+        }
+        resizeVideoFromSourceURL(srcVideoURL, i, tmpScaleURL, CGSizeMake([vlrobj.postRenderSizeX floatValue],[vlrobj.postRenderSizeY floatValue]), YES, NO);
+        [FileUitl deleteFile:srcVideoPath];
+        [[NSFileManager defaultManager] moveItemAtPath:tmpScalePath toPath:srcVideoPath error:nil];
+    }
+ 
+    
+    ////------
+    NSLog(@"vlrobj.videoOverlay:%@",vlrobj.videoOverlay);
+    CDVideoOverlayObjectPrint(vlrobj.videoOverlay);
+    ////------
+    
+    
+    ////------
+    NSLog(@"vlrobj.videoOverlay:%@",vlrobj.videoOverlay);
+    CDVideoOverlayObjectPrint(vlrobj.videoOverlay);
+    ////------
+    
+    
+    if (vlrobj.videoOverlay) {
+        NSLog(@"pre-handling-of-vlrobj.videoOverlay");
+        CDVideoOverlayObjectStateOneProcessingFlow(vlrobj.videoOverlay, YES, YES);
+        
+        ////合成
+        ////把自己的video和overlay合成
+        for (int i = 0; i<sourceVideoURLs.count; i++) {
+            NSURL * srcVideoURL = (NSURL*)sourceVideoURLs[i];
+            NSString * srcVideoPath = [srcVideoURL path];
+            ////中间文件路径 /MOVIES_POST_FILTERING/VIDEO/下 名字加个_tmp
+            NSString * suffix = [srcVideoPath pathExtension];
+            NSString * tmpMergePath = [srcVideoPath stringByDeletingPathExtension];
+            tmpMergePath = [tmpMergePath stringByAppendingFormat:@"_tmp.%@",suffix];
+            NSURL * tmpMergeURL = [NSURL fileURLWithPath:tmpMergePath];
+            [FileUitl deleteFile:tmpMergePath];
+            NSLog(@"srcVideoURL:%@",srcVideoURL);
+            ////overlay合成
+            
+            NSMutableArray * movingPathCGpointXs  = vlrobj.videoOverlay.movingPathCGpointXs;
+            NSMutableArray * movingPathCGpointYs  = vlrobj.videoOverlay.movingPathCGpointYs;
+            NSMutableArray * movingSectionDurations = vlrobj.videoOverlay.movingSectionDurations;
+            NSMutableArray * pathPoints;
+            if (movingPathCGpointXs && movingPathCGpointYs) {
+                
+            } else {
+                [movingPathCGpointXs addObject:[NSNumber numberWithFloat:0.0]];
+                [movingPathCGpointYs addObject:[NSNumber numberWithFloat:0.0]];
+                movingSectionDurations= NULL;
+            }
+            pathPoints = reconstructMovingPath(movingPathCGpointXs, movingPathCGpointYs);
+            
+            NSLog(@"pathPoints:%@",pathPoints);
+            NSLog(@"movingSectionDurations:%@",movingSectionDurations);
+            
+            ////这里需要把带速度的轨迹点分段集合 重新构造成一组匀速的点，因为overlayVideoFilesToSingleTrackVideoFile
+            ////不支持带速度，想反应速度只能分割
+            ////例如 4.0====2sec======6.0  需要在中间插入一个点变成 4.0==1sec==5.0 5.0==1sec==6.0
+            NSMutableArray * newPathPoints;
+            newPathPoints = toAverageSpeedMovingPathPoints(pathPoints, movingSectionDurations);
+            
+            
+ 
+            NSLog(@"newPathPoints:%@",newPathPoints);
+            
+            
+            NSMutableArray * mergeVideoURLs = [[NSMutableArray alloc] init];
+            ////注:这一步，因为目前这个功能还是用 AVFoundation实现的，黑色背景的视频与原视频合成AVF依赖opacity效果不理想
+            ////所以这一步使用overlayVideoFilesToSingleTrackVideoFile处理
+            ////
+            int typeNum = blendTypeToEnum(vlrobj.videoOverlay.blendMode);
+            ////当前只支持normal,也就是overlay在video上面
+            switch (typeNum) {
+                case blendModeType_Normal:
+                {
+                    [mergeVideoURLs addObject:[NSURL URLWithString: vlrobj.videoOverlay.absoluteURLstring]];
+                    [mergeVideoURLs addObject:srcVideoURL];
+                    break;
+                }
+                case blendModeType_MSAdd:
+                {
+                    [mergeVideoURLs addObject:[NSURL URLWithString: vlrobj.videoOverlay.absoluteURLstring]];
+                    [mergeVideoURLs addObject:srcVideoURL];
+                    break;
+                }
+                default:
+                {
+                    [mergeVideoURLs addObject:[NSURL URLWithString: vlrobj.videoOverlay.absoluteURLstring]];
+                    [mergeVideoURLs addObject:srcVideoURL];
+                    break;
+                }
+            }
+            
+            NSLog(@"mergeVideoURLs:%@",mergeVideoURLs);
+            NSLog(@"newPathPoints:%@",newPathPoints);
+            NSLog(@"tmpMergeURL:%@",tmpMergeURL);
+            NSLog(@"typeNum:%d:%d",typeNum,blendModeType_Normal);
+            
+            NSMutableArray * atTimes = [[NSMutableArray alloc] init];
+            [atTimes addObject:vlrobj.videoOverlay.startTime];
+            [atTimes addObject:[NSNumber numberWithFloat:0.0]];
+            
+
+            
+            
+            NSLog(@"atTimes:%@",atTimes);
+            
+            NSMutableArray * pathPointsArray = [[NSMutableArray alloc] init];
+            [pathPointsArray addObject:newPathPoints];
+            [pathPointsArray addObject:[NSNull null]];
+            
+            
+            
+            
+            
+            
+            switch (typeNum) {
+                case blendModeType_Normal:
+                {
+                    overlayVideoFilesToSingleTrackVideoFile(mergeVideoURLs,pathPointsArray,atTimes, tmpMergeURL, YES, NO);
+                    break;
+                }
+                case blendModeType_MSAdd:
+                {
+                    overlayVideoFilesWithMSAddModeSYNC(srcVideoURL, [NSURL URLWithString: vlrobj.videoOverlay.absoluteURLstring], tmpMergeURL, [vlrobj.postRenderSizeX floatValue], [vlrobj.postRenderSizeY floatValue], 1280000);
+                    break;
+                }
+                default:
+                {
+                    overlayVideoFilesToSingleTrackVideoFile(mergeVideoURLs,pathPointsArray,atTimes, tmpMergeURL, YES, NO);
+                    break;
+                }
+            }
+            
+            [FileUitl deleteFile:srcVideoPath];
+            [[NSFileManager defaultManager] moveItemAtPath:tmpMergePath toPath:srcVideoPath error:nil];
+            
+            
+        }
+        
+    } else { }
+    
+    
+    
+    ////最终合成
+    ////所有处理过的音轨,视轨，合成一个movie
+    ////把自己的videos audios 一起合成movie
+    ////其实合成有很多种情况,首先多video轨道 因为大多播放器不支持暂时不考虑
+    ////多音频在这里先合成了一个音轨
+    ////也就是说目前只保留第一个视频轨道(通常播放器也只能播放第一个)
+    ////其次无论原文件有多少条音轨，最后都合并成一条,下面规则::
+    ////
+    //// <video only keep one>
+    //// <audio all in one>
+    ////
+    ////{
+    ////----把多个音频文件合成一个音频文件的多条track
+    ////void combineAudioFilesToMultiTracksAudioFile(NSMutableArray*sourceAudioURLs,NSURL * destAudioURL, BOOL SYNC,BOOL SAVETOALBUM);
+    ////----把多个视频文件removePT合成一个视频文件的多条track,apple  not support write multiTracks to a file
+    ////----to implement this  you must  use trackGroup  per track/per trackgroup
+    ////----AVAssetTrackGroup是一组track，同时只能播放其中一条track，但是不同的AVAssetTrackGroup中的track可以同时播放
+    ////void combineVideoFilesToMultiTracksVideoFile(NSMutableArray*sourceVideoURLs,NSURL * destVideoURL, BOOL SYNC,BOOL SAVETOALBUM);
+    //// 上面这两个功能步在这里使用，避免繁杂的逻辑
+    ////}
+    NSString * finalSingleMoviePath = getPostFilteringMovieFilePath(vlrobj.video.videoId, vlrobj.video.makerId, nil, nil);
+    NSURL * finalSingleMovieURL = [NSURL fileURLWithPath:finalSingleMoviePath];
+    [FileUitl deleteFile:finalSingleMoviePath];
+    combineMultiSingleTrackAudioFilesAndMultiSingleTrackVideoFilesToMovieFile(sourceAudioURLs, sourceVideoURLs,finalSingleMovieURL, YES, NO);
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////----test
+    CDVideoLocalRenderObject * vlrobj = self.videoObject.videoLocalRender;
+    
+    NSLog(@"CDVideoLocalRenderObject:%@",vlrobj);
+    
+    CDVideoOverlayObjectPrint(self.videoObject.videoLocalRender.videoOverlay);
+
+    NSLog(@"self.videoObject.videoLocalRender.videoOverlay:%@",self.videoObject.videoLocalRender.videoOverlay);
+    NSString *videoPath=[[NSBundle mainBundle] pathForResource:@"default_overlay" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath = getMaterialOverlaysMovieFilePath(self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath toPath:videoOverlaySrcPath error:nil];
+    NSURL * videoOverlaySrcURL = [NSURL fileURLWithPath:videoOverlaySrcPath];
+    self.videoObject.videoLocalRender.videoOverlay.exist = [NSNumber numberWithBool:YES];
+    self.videoObject.videoLocalRender.videoOverlay.absoluteURLstring = [videoOverlaySrcURL absoluteString];
+    self.videoObject.videoLocalRender.videoOverlay.type = @"video";
+    self.videoObject.videoLocalRender.videoOverlay.startTime = [NSNumber numberWithFloat:0.0];
+    self.videoObject.videoLocalRender.videoOverlay.duration = [NSNumber numberWithFloat:21.0];
+    self.videoObject.videoLocalRender.videoOverlay.timeTrimingMode = @"tail";
+    self.videoObject.videoLocalRender.videoOverlay.timeFillingMode = @"repeat";
+    self.videoObject.videoLocalRender.videoOverlay.blendMode = @"normal";
+    self.videoObject.videoLocalRender.videoOverlay.width = [NSNumber numberWithFloat:328.0];
+    self.videoObject.videoLocalRender.videoOverlay.height = [NSNumber numberWithFloat:266.0];
+    NSMutableArray * pathPoints = [[NSMutableArray alloc] init];
+    NSMutableArray * movingSectionDurations = [[NSMutableArray alloc] init];
+    for (int i = 0; i < 11.0; i++) {
+        CGPoint pt = CGPointMake(128*i, 72*i);
+        [pathPoints addObject:[NSValue valueWithCGPoint:pt]];
+        [movingSectionDurations addObject:[NSNumber numberWithFloat:0.5]];
+    }
+    NSMutableDictionary * temp = splitMovingPathToXsAndYs(pathPoints);
+    self.videoObject.videoLocalRender.videoOverlay.movingPathCGpointXs = [temp valueForKey:@"X"];
+    self.videoObject.videoLocalRender.videoOverlay.movingPathCGpointYs = [temp valueForKey:@"Y"];
+    self.videoObject.videoLocalRender.videoOverlay.movingSectionDurations = movingSectionDurations;
+    
+   CDVideoOverlayObjectPrint(self.videoObject.videoLocalRender.videoOverlay);
+
+    
+    CDVideoLocalRenderObjectStateOneProcessingFlow(vlrobj, NO, YES);
+    
+    
+    
+    
+    
+    ////----test
+
+
+
+
+
+
+
+
+    ////----test
+    CDVideoLocalRenderObject * vlrobj = self.videoObject.videoLocalRender;
+    
+    NSLog(@"CDVideoLocalRenderObject:%@",vlrobj);
+    
+    CDVideoOverlayObjectPrint(self.videoObject.videoLocalRender.videoOverlay);
+
+    NSLog(@"self.videoObject.videoLocalRender.videoOverlay:%@",self.videoObject.videoLocalRender.videoOverlay);
+    NSString *videoPath=[[NSBundle mainBundle] pathForResource:@"default_overlay" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath = getMaterialOverlaysMovieFilePath(self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath toPath:videoOverlaySrcPath error:nil];
+    NSURL * videoOverlaySrcURL = [NSURL fileURLWithPath:videoOverlaySrcPath];
+    self.videoObject.videoLocalRender.videoOverlay.exist = [NSNumber numberWithBool:YES];
+    self.videoObject.videoLocalRender.videoOverlay.absoluteURLstring = [videoOverlaySrcURL absoluteString];
+    self.videoObject.videoLocalRender.videoOverlay.type = @"video";
+    self.videoObject.videoLocalRender.videoOverlay.startTime = [NSNumber numberWithFloat:0.0];
+    self.videoObject.videoLocalRender.videoOverlay.duration = [NSNumber numberWithFloat:21.0];
+    self.videoObject.videoLocalRender.videoOverlay.timeTrimingMode = @"tail";
+    self.videoObject.videoLocalRender.videoOverlay.timeFillingMode = @"repeat";
+    self.videoObject.videoLocalRender.videoOverlay.blendMode = @"normal";
+    self.videoObject.videoLocalRender.videoOverlay.width = [NSNumber numberWithFloat:328.0];
+    self.videoObject.videoLocalRender.videoOverlay.height = [NSNumber numberWithFloat:266.0];
+    NSMutableArray * pathPoints = [[NSMutableArray alloc] init];
+    NSMutableArray * movingSectionDurations = [[NSMutableArray alloc] init];
+    for (int i = 0; i < 11.0; i++) {
+        CGPoint pt = CGPointMake(128*i, 72*i);
+        [pathPoints addObject:[NSValue valueWithCGPoint:pt]];
+        [movingSectionDurations addObject:[NSNumber numberWithFloat:0.5]];
+    }
+    NSMutableDictionary * temp = splitMovingPathToXsAndYs(pathPoints);
+    self.videoObject.videoLocalRender.videoOverlay.movingPathCGpointXs = [temp valueForKey:@"X"];
+    self.videoObject.videoLocalRender.videoOverlay.movingPathCGpointYs = [temp valueForKey:@"Y"];
+    self.videoObject.videoLocalRender.videoOverlay.movingSectionDurations = movingSectionDurations;
+    
+   CDVideoOverlayObjectPrint(self.videoObject.videoLocalRender.videoOverlay);
+
+    
+    CDVideoLocalRenderObjectStateOneProcessingFlow(vlrobj, NO, YES);
+    
+    
+    
+    
+    
+    ////----test
+
+

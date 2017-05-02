@@ -1,0 +1,256 @@
+  
+    NSString *videoPath=[[NSBundle mainBundle] pathForResource:@"default_titles" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    
+    
+    
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath toPath:videoOverlaySrcPath error:nil];
+    NSURL * videoOverlaySrcURL = [NSURL fileURLWithPath:videoOverlaySrcPath];
+    
+    
+    
+    
+    
+    NSString * writerOutputPath_G = [videoOverlaySrcPath stringByDeletingLastPathComponent];
+    writerOutputPath_G = [writerOutputPath_G  stringByAppendingPathComponent:@"ORO.mov"];
+    [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath_G error:nil];
+    NSURL * writerOutputURL_G = [NSURL fileURLWithPath:writerOutputPath_G];
+    
+    
+    NSString * writerOutputPath_B = [videoOverlaySrcPath stringByDeletingLastPathComponent];
+    writerOutputPath_B = [writerOutputPath_B  stringByAppendingPathComponent:@"ORR.mov"];
+    [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath_B error:nil];
+    NSURL * writerOutputURL_B = [NSURL fileURLWithPath:writerOutputPath_B];
+    
+    NSString * writerOutputPath_R = [videoOverlaySrcPath stringByDeletingLastPathComponent];
+    writerOutputPath_R = [writerOutputPath_R  stringByAppendingPathComponent:@"ORG.mov"];
+    [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath_R error:nil];
+    NSURL * writerOutputURL_R = [NSURL fileURLWithPath:writerOutputPath_R];
+    
+    {
+        VTFastRecomp * vtfrc = [[VTFastRecomp alloc] init];
+        [vtfrc resetParameters];
+        vtfrc.sourceVideoURL = videoOverlaySrcURL;
+        vtfrc.writerOutputURL = writerOutputURL_R;
+        vtfrc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtfrc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        
+        
+        vtfrc.compressionCodecType = kCMVideoCodecType_H264;
+        vtfrc.compressionAverageBitRate = 1280000;
+        vtfrc.deleteOutputDirBeforeWrite = YES;
+        vtfrc.useOnlyDurations = NO;
+        vtfrc.applyOOBPT = NO;
+        vtfrc.applyOOBPTQuick = NO;
+        vtfrc.useCacheArray = YES;
+        vtfrc.cacheArraySize = 2;
+        vtfrc.writerShouldOptimizeForNetworkUse = YES;
+        vtfrc.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        vtfrc.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+        vtfrc.compSessionWidth = 1280.0;
+        vtfrc.compSessionHeight = 720.0;
+        
+        vtfrc.applyFilter = YES;
+        vtfrc.enablePreviousResultsBuffers = NO;
+        vtfrc.previousResultsBuffersCapacity = 0;
+        vtfrc.SYNC = YES;
+        
+        GPUImageProsAlphaToAAA * ProsAlphaToAAAFilter = [[GPUImageProsAlphaToAAA  alloc] init];
+        ProsAlphaToAAAFilter.mode = @"ORO";
+        vtfrc.initedFilter = ProsAlphaToAAAFilter;
+        vtfrc.terminatedFilter = ProsAlphaToAAAFilter;
+        
+        
+        
+        
+        [vtfrc makeRecomp];
+    }
+    {
+        VTFastRecomp * vtfrc = [[VTFastRecomp alloc] init];
+        [vtfrc resetParameters];
+        vtfrc.sourceVideoURL = videoOverlaySrcURL;
+        vtfrc.writerOutputURL = writerOutputURL_G;
+        vtfrc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtfrc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        vtfrc.compressionCodecType = kCMVideoCodecType_H264;
+        vtfrc.compressionAverageBitRate = 1280000;
+        vtfrc.deleteOutputDirBeforeWrite = YES;
+        vtfrc.useOnlyDurations = NO;
+        vtfrc.applyOOBPT = NO;
+        vtfrc.applyOOBPTQuick = NO;
+        vtfrc.useCacheArray = YES;
+        vtfrc.cacheArraySize = 2;
+        vtfrc.writerShouldOptimizeForNetworkUse = YES;
+        vtfrc.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        vtfrc.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+        vtfrc.compSessionWidth = 1280.0;
+        vtfrc.compSessionHeight = 720.0;
+        
+        vtfrc.applyFilter = YES;
+        vtfrc.enablePreviousResultsBuffers = NO;
+        vtfrc.previousResultsBuffersCapacity = 0;
+        vtfrc.SYNC = YES;
+        
+        GPUImageProsAlphaToAAA * ProsAlphaToAAAFilter = [[GPUImageProsAlphaToAAA  alloc] init];
+        ProsAlphaToAAAFilter.mode = @"ORR";
+        vtfrc.initedFilter = ProsAlphaToAAAFilter;
+        vtfrc.terminatedFilter = ProsAlphaToAAAFilter;
+        
+        
+        
+        
+        [vtfrc makeRecomp];
+    }
+    
+    {
+        VTFastRecomp * vtfrc = [[VTFastRecomp alloc] init];
+        [vtfrc resetParameters];
+        vtfrc.sourceVideoURL = videoOverlaySrcURL;
+        vtfrc.writerOutputURL = writerOutputURL_B;
+        vtfrc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtfrc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        vtfrc.compressionCodecType = kCMVideoCodecType_H264;
+        vtfrc.compressionAverageBitRate = 1280000;
+        vtfrc.deleteOutputDirBeforeWrite = YES;
+        vtfrc.useOnlyDurations = NO;
+        vtfrc.applyOOBPT = NO;
+        vtfrc.applyOOBPTQuick = NO;
+        vtfrc.useCacheArray = YES;
+        vtfrc.cacheArraySize = 2;
+        vtfrc.writerShouldOptimizeForNetworkUse = YES;
+        vtfrc.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        vtfrc.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+        vtfrc.compSessionWidth = 1280.0;
+        vtfrc.compSessionHeight = 720.0;
+        
+        vtfrc.applyFilter = YES;
+        vtfrc.enablePreviousResultsBuffers = NO;
+        vtfrc.previousResultsBuffersCapacity = 0;
+        vtfrc.SYNC = YES;
+        
+        GPUImageProsAlphaToAAA * ProsAlphaToAAAFilter = [[GPUImageProsAlphaToAAA  alloc] init];
+        ProsAlphaToAAAFilter.mode = @"ORG";
+        vtfrc.initedFilter = ProsAlphaToAAAFilter;
+        vtfrc.terminatedFilter = ProsAlphaToAAAFilter;
+        
+        
+        
+        
+        [vtfrc makeRecomp];
+    }
+
+
+
+
+
+
+
+
+
+
+    NSString *videoPath=[[NSBundle mainBundle] pathForResource:@"cartoon" ofType:@"m4v"];
+    NSString *videoOverlaySrcPath = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    
+    
+    
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath toPath:videoOverlaySrcPath error:nil];
+    NSURL * videoOverlaySrcURL = [NSURL fileURLWithPath:videoOverlaySrcPath];
+    
+
+    for (int i = 0; i<125; i++) {
+        NSString * mode = decToModeString(i);
+        NSString * name = [mode stringByAppendingString:@".mov"];
+        NSString * writerOutputPath = [videoOverlaySrcPath stringByDeletingLastPathComponent];
+        writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:name];
+        [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+        NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+        
+        NSLog(@"writerOutputURL:%@",writerOutputURL);
+        
+        VTFastRecomp * vtfrc = [[VTFastRecomp alloc] init];
+        [vtfrc resetParameters];
+        vtfrc.sourceVideoURL = videoOverlaySrcURL;
+        vtfrc.writerOutputURL = writerOutputURL;
+        vtfrc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtfrc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        vtfrc.compressionCodecType = kCMVideoCodecType_H264;
+        vtfrc.compressionAverageBitRate = 1280000;
+        vtfrc.deleteOutputDirBeforeWrite = YES;
+        vtfrc.useOnlyDurations = NO;
+        vtfrc.applyOOBPT = NO;
+        vtfrc.applyOOBPTQuick = NO;
+        vtfrc.useCacheArray = YES;
+        vtfrc.cacheArraySize = 2;
+        vtfrc.writerShouldOptimizeForNetworkUse = YES;
+        vtfrc.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        vtfrc.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+        vtfrc.compSessionWidth = 1280.0;
+        vtfrc.compSessionHeight = 720.0;
+        vtfrc.applyFilter = YES;
+        vtfrc.enablePreviousResultsBuffers = NO;
+        vtfrc.previousResultsBuffersCapacity = 0;
+        vtfrc.SYNC = YES;
+        GPUImageProsAlphaToAAA * ProsAlphaToAAAFilter = [[GPUImageProsAlphaToAAA  alloc] init];
+        ProsAlphaToAAAFilter.mode = mode;
+        vtfrc.initedFilter = ProsAlphaToAAAFilter;
+        vtfrc.terminatedFilter = ProsAlphaToAAAFilter;
+        [vtfrc makeRecomp];
+    }
+
+
+
+
+    NSString *videoPath=[[NSBundle mainBundle] pathForResource:@"cartoon" ofType:@"m4v"];
+    NSString *videoOverlaySrcPath = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    
+    
+    
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath toPath:videoOverlaySrcPath error:nil];
+    NSURL * videoOverlaySrcURL = [NSURL fileURLWithPath:videoOverlaySrcPath];
+    
+    
+    for (int i = 0; i<125; i++) {
+        NSString * mode = [GPUImageProsAlphaToAAA decToModeString:i];
+        NSString * name = [mode stringByAppendingString:@".mov"];
+        NSString * writerOutputPath = [videoOverlaySrcPath stringByDeletingLastPathComponent];
+        writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:name];
+        [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+        NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+        
+        NSLog(@"writerOutputURL:%@",writerOutputURL);
+        
+        VTFastRecomp * vtfrc = [[VTFastRecomp alloc] init];
+        [vtfrc resetParameters];
+        vtfrc.sourceVideoURL = videoOverlaySrcURL;
+        vtfrc.writerOutputURL = writerOutputURL;
+        vtfrc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtfrc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        vtfrc.compressionCodecType = kCMVideoCodecType_H264;
+        vtfrc.compressionAverageBitRate = 1280000;
+        vtfrc.deleteOutputDirBeforeWrite = YES;
+        vtfrc.useOnlyDurations = NO;
+        vtfrc.applyOOBPT = NO;
+        vtfrc.applyOOBPTQuick = NO;
+        vtfrc.useCacheArray = YES;
+        vtfrc.cacheArraySize = 2;
+        vtfrc.writerShouldOptimizeForNetworkUse = YES;
+        vtfrc.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        vtfrc.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+        vtfrc.compSessionWidth = 1280.0;
+        vtfrc.compSessionHeight = 720.0;
+        vtfrc.applyFilter = YES;
+        vtfrc.enablePreviousResultsBuffers = NO;
+        vtfrc.previousResultsBuffersCapacity = 0;
+        vtfrc.SYNC = YES;
+        GPUImageProsAlphaToAAA * ProsAlphaToAAAFilter = [[GPUImageProsAlphaToAAA  alloc] init];
+        ProsAlphaToAAAFilter.mode = mode;
+        ProsAlphaToAAAFilter.matt = YES;
+        vtfrc.initedFilter = ProsAlphaToAAAFilter;
+        vtfrc.terminatedFilter = ProsAlphaToAAAFilter;
+        [vtfrc makeRecomp];
+    }
+
+

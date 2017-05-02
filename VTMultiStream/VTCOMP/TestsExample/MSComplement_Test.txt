@@ -1,0 +1,427 @@
+    ////----test
+    
+    
+    NSString *videoPath1=[[NSBundle mainBundle] pathForResource:@"default_titles" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath1 = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath1 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath1 toPath:videoOverlaySrcPath1 error:nil];
+    NSURL * videoOverlaySrcURL1 = [NSURL fileURLWithPath:videoOverlaySrcPath1];
+    
+    NSString *videoPath2=[[NSBundle mainBundle] pathForResource:@"cartoon" ofType:@"m4v"];
+    NSString *videoOverlaySrcPath2 = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByDeletingPathExtension];
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByAppendingString:@"_2.mp4"];
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath2 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath2 toPath:videoOverlaySrcPath2 error:nil];
+    NSURL * videoOverlaySrcURL2 = [NSURL fileURLWithPath:videoOverlaySrcPath2];
+    
+    
+    
+    NSString * writerOutputPath = [videoOverlaySrcPath1 stringByDeletingLastPathComponent];
+    writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:@"MSComplement.mov"];
+    [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+    NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+    
+    
+    
+    VTMSDecomp  * stream1 = [[VTMSDecomp alloc] init];
+    {
+        [stream1 resetParameters];
+        stream1.sourceVideoURL = videoOverlaySrcURL1;
+        stream1.useOnlyDurations = NO;
+        stream1.useCacheArray = YES;
+        stream1.cacheArraySize = 2;
+        stream1.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        stream1.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+    }
+    
+    VTMSDecomp  * stream2 = [[VTMSDecomp alloc] init];
+    {
+        [stream2 resetParameters];
+        stream2.sourceVideoURL = videoOverlaySrcURL2;
+        stream2.useOnlyDurations = NO;
+        stream2.useCacheArray = YES;
+        stream2.cacheArraySize = 2;
+        stream2.constructDestinationImageBufferAttributesFromKeyValue = YES;
+        stream2.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+    }
+    
+    VTMSComp * vtmsc = [[VTMSComp alloc] init];
+    {
+        [vtmsc resetParameters];
+        vtmsc.writerOutputURL = writerOutputURL;
+        vtmsc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+        vtmsc.compressionSessionPropertiesConstructFromKeyValue =YES;
+        vtmsc.compressionAverageBitRate = 1280000;
+        vtmsc.deleteOutputDirBeforeWrite = YES;
+        vtmsc.writerShouldOptimizeForNetworkUse = YES;
+        vtmsc.compSessionWidth = 1280.0;
+        vtmsc.compSessionHeight = 720.0;
+        GPUImageMSComplement * MSComplement = [[GPUImageMSComplement alloc] init];
+        [MSComplement useNextFrameForImageCapture];
+        MSComplement.mode = @"ellipse";
+        GPUImagePicture * refpic = [[GPUImagePicture alloc] initWithImage:[UIImage imageNamed:@"default_image_overlay.png"]];
+        [refpic addTarget:MSComplement atTextureLocation:2];
+        [refpic processImage];
+        [MSComplement useNextFrameForImageCapture];
+        vtmsc.initedFilter = MSComplement;
+        vtmsc.applyFilter  = YES;
+        vtmsc.SYNC = YES;
+        [vtmsc makeMSinit];
+        [vtmsc addDecompStream:stream1];
+        [vtmsc addDecompStream:stream2];
+        [vtmsc makeRecomp];
+        
+    }
+    
+    
+    
+    ////----test
+
+
+
+
+
+
+
+    ////—refpic-test
+    
+
+    NSString *videoPath1=[[NSBundle mainBundle] pathForResource:@"default_tail" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath1 = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath1 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath1 toPath:videoOverlaySrcPath1 error:nil];
+    NSURL * videoOverlaySrcURL1 = [NSURL fileURLWithPath:videoOverlaySrcPath1];
+    
+    NSString *videoPath2=[[NSBundle mainBundle] pathForResource:@"cartoon" ofType:@"m4v"];
+    NSString *videoOverlaySrcPath2 = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByDeletingPathExtension];
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByAppendingString:@"_2.mp4"];
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath2 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath2 toPath:videoOverlaySrcPath2 error:nil];
+    NSURL * videoOverlaySrcURL2 = [NSURL fileURLWithPath:videoOverlaySrcPath2];
+    
+    
+    for (int rows = 1; rows< 10; rows++) {
+        for (int cols = 1; cols < 10; cols++) {
+            
+            {
+                NSString * writerOutputPath = [videoOverlaySrcPath1 stringByDeletingLastPathComponent];
+                NSString * name = [NSString stringWithFormat:@"%d_%d_%d_MSComplement.mov",rows,cols,0];
+                writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:name];
+                [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+                NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+
+               
+                NSString * picname = [NSString stringWithFormat:@"chess_layout_%d_multiply_%d_mode_%d.png",rows,cols,0];
+                
+                
+                VTMSDecomp  * stream1 = [[VTMSDecomp alloc] init];
+                {
+                    [stream1 resetParameters];
+                    stream1.sourceVideoURL = videoOverlaySrcURL1;
+                    stream1.useOnlyDurations = NO;
+                    stream1.useCacheArray = YES;
+                    stream1.cacheArraySize = 2;
+                    stream1.constructDestinationImageBufferAttributesFromKeyValue = YES;
+                    stream1.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+                }
+                
+                VTMSDecomp  * stream2 = [[VTMSDecomp alloc] init];
+                {
+                    [stream2 resetParameters];
+                    stream2.sourceVideoURL = videoOverlaySrcURL2;
+                    stream2.useOnlyDurations = NO;
+                    stream2.useCacheArray = YES;
+                    stream2.cacheArraySize = 2;
+                    stream2.constructDestinationImageBufferAttributesFromKeyValue = YES;
+                    stream2.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+                }
+                
+                VTMSComp * vtmsc = [[VTMSComp alloc] init];
+                {
+                    [vtmsc resetParameters];
+                    vtmsc.writerOutputURL = writerOutputURL;
+                    vtmsc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+                    vtmsc.compressionSessionPropertiesConstructFromKeyValue =YES;
+                    vtmsc.compressionAverageBitRate = 1280000;
+                    vtmsc.deleteOutputDirBeforeWrite = YES;
+                    vtmsc.writerShouldOptimizeForNetworkUse = YES;
+                    vtmsc.compSessionWidth = 1280.0;
+                    vtmsc.compSessionHeight = 720.0;
+                    GPUImageMSComplement * MSComplement = [[GPUImageMSComplement alloc] init];
+                    [MSComplement useNextFrameForImageCapture];
+                    MSComplement.mode = @"refpic";
+                    GPUImagePicture * refpic = [[GPUImagePicture alloc] initWithImage:[UIImage imageNamed:picname]];
+                    [refpic addTarget:MSComplement atTextureLocation:2];
+                    [refpic processImage];
+                    [MSComplement useNextFrameForImageCapture];
+                    vtmsc.initedFilter = MSComplement;
+                    vtmsc.applyFilter  = YES;
+                    vtmsc.SYNC = YES;
+                    [vtmsc makeMSinit];
+                    [vtmsc addDecompStream:stream1];
+                    [vtmsc addDecompStream:stream2];
+                    [vtmsc makeRecomp];
+                    
+                }
+                
+                
+                
+                
+            }
+
+            {
+                NSString * writerOutputPath = [videoOverlaySrcPath1 stringByDeletingLastPathComponent];
+                NSString * name = [NSString stringWithFormat:@"%d_%d_%d_MSComplement.mov",rows,cols,1];
+                writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:name];
+                [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+                NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+                
+                
+                NSString * picname = [NSString stringWithFormat:@"chess_layout_%d_multiply_%d_mode_%d.png",rows,cols,1];
+                
+                
+                VTMSDecomp  * stream1 = [[VTMSDecomp alloc] init];
+                {
+                    [stream1 resetParameters];
+                    stream1.sourceVideoURL = videoOverlaySrcURL1;
+                    stream1.useOnlyDurations = NO;
+                    stream1.useCacheArray = YES;
+                    stream1.cacheArraySize = 2;
+                    stream1.constructDestinationImageBufferAttributesFromKeyValue = YES;
+                    stream1.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+                }
+                
+                VTMSDecomp  * stream2 = [[VTMSDecomp alloc] init];
+                {
+                    [stream2 resetParameters];
+                    stream2.sourceVideoURL = videoOverlaySrcURL2;
+                    stream2.useOnlyDurations = NO;
+                    stream2.useCacheArray = YES;
+                    stream2.cacheArraySize = 2;
+                    stream2.constructDestinationImageBufferAttributesFromKeyValue = YES;
+                    stream2.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+                }
+                
+                VTMSComp * vtmsc = [[VTMSComp alloc] init];
+                {
+                    [vtmsc resetParameters];
+                    vtmsc.writerOutputURL = writerOutputURL;
+                    vtmsc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+                    vtmsc.compressionSessionPropertiesConstructFromKeyValue =YES;
+                    vtmsc.compressionAverageBitRate = 1280000;
+                    vtmsc.deleteOutputDirBeforeWrite = YES;
+                    vtmsc.writerShouldOptimizeForNetworkUse = YES;
+                    vtmsc.compSessionWidth = 1280.0;
+                    vtmsc.compSessionHeight = 720.0;
+                    GPUImageMSComplement * MSComplement = [[GPUImageMSComplement alloc] init];
+                    [MSComplement useNextFrameForImageCapture];
+                    MSComplement.mode = @"refpic";
+                    GPUImagePicture * refpic = [[GPUImagePicture alloc] initWithImage:[UIImage imageNamed:picname]];
+                    [refpic addTarget:MSComplement atTextureLocation:2];
+                    [refpic processImage];
+                    [MSComplement useNextFrameForImageCapture];
+                    vtmsc.initedFilter = MSComplement;
+                    vtmsc.applyFilter  = YES;
+                    vtmsc.SYNC = YES;
+                    [vtmsc makeMSinit];
+                    [vtmsc addDecompStream:stream1];
+                    [vtmsc addDecompStream:stream2];
+                    [vtmsc makeRecomp];
+                    
+                }
+                
+                
+                
+                
+            }
+            
+        }
+    }
+
+    
+    
+
+    
+    
+    
+    
+
+
+    
+    
+    
+    ////—refpic-test
+
+
+
+
+
+    NSString *videoPath1=[[NSBundle mainBundle] pathForResource:@"default_tail" ofType:@"mp4"];
+    NSString *videoOverlaySrcPath1 = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath1 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath1 toPath:videoOverlaySrcPath1 error:nil];
+    NSURL * videoOverlaySrcURL1 = [NSURL fileURLWithPath:videoOverlaySrcPath1];
+    
+    NSString *videoPath2=[[NSBundle mainBundle] pathForResource:@"cartoon" ofType:@"m4v"];
+    NSString *videoOverlaySrcPath2 = getMaterialOverlaysVideoOnlyFilePath(0, self.videoObject.videoId, self.videoObject.makerId, nil, nil);
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByDeletingPathExtension];
+    videoOverlaySrcPath2 = [videoOverlaySrcPath2 stringByAppendingString:@"_2.mp4"];
+    [[NSFileManager defaultManager] removeItemAtPath:videoOverlaySrcPath2 error:nil];
+    [[NSFileManager defaultManager] copyItemAtPath:videoPath2 toPath:videoOverlaySrcPath2 error:nil];
+    NSURL * videoOverlaySrcURL2 = [NSURL fileURLWithPath:videoOverlaySrcPath2];
+    
+    
+
+
+
+    for (int rows = 1; rows< 10; rows++) {
+        for (int cols = 1; cols < 10; cols++) {
+            
+            {
+                NSString * writerOutputPath = [videoOverlaySrcPath1 stringByDeletingLastPathComponent];
+                NSString * name = [NSString stringWithFormat:@"%d_%d_%d_MSComplement.mov",rows,cols,0];
+                writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:name];
+                [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+                NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+
+               
+                NSString * picname = [NSString stringWithFormat:@"chess_layout_%d_multiply_%d_mode_%d.png",rows,cols,0];
+                
+                
+                VTMSDecomp  * stream1 = [[VTMSDecomp alloc] init];
+                {
+                    [stream1 resetParameters];
+                    stream1.sourceVideoURL = videoOverlaySrcURL1;
+                    stream1.useOnlyDurations = NO;
+                    stream1.useCacheArray = YES;
+                    stream1.cacheArraySize = 2;
+                    stream1.constructDestinationImageBufferAttributesFromKeyValue = YES;
+                    stream1.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+                }
+                
+                VTMSDecomp  * stream2 = [[VTMSDecomp alloc] init];
+                {
+                    [stream2 resetParameters];
+                    stream2.sourceVideoURL = videoOverlaySrcURL2;
+                    stream2.useOnlyDurations = NO;
+                    stream2.useCacheArray = YES;
+                    stream2.cacheArraySize = 2;
+                    stream2.constructDestinationImageBufferAttributesFromKeyValue = YES;
+                    stream2.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+                }
+                
+                VTMSComp * vtmsc = [[VTMSComp alloc] init];
+                {
+                    [vtmsc resetParameters];
+                    vtmsc.writerOutputURL = writerOutputURL;
+                    vtmsc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+                    vtmsc.compressionSessionPropertiesConstructFromKeyValue =YES;
+                    vtmsc.compressionAverageBitRate = 1280000;
+                    vtmsc.deleteOutputDirBeforeWrite = YES;
+                    vtmsc.writerShouldOptimizeForNetworkUse = YES;
+                    vtmsc.compSessionWidth = 1280.0;
+                    vtmsc.compSessionHeight = 720.0;
+                    GPUImageMSComplement * MSComplement = [[GPUImageMSComplement alloc] init];
+                    [MSComplement useNextFrameForImageCapture];
+                    MSComplement.mode = @"refpic";
+                    GPUImagePicture * refpic = [[GPUImagePicture alloc] initWithImage:[UIImage imageNamed:picname]];
+                    [refpic addTarget:MSComplement atTextureLocation:2];
+                    [refpic processImage];
+                    [MSComplement useNextFrameForImageCapture];
+                    vtmsc.initedFilter = MSComplement;
+                    vtmsc.applyFilter  = YES;
+                    vtmsc.SYNC = YES;
+                    [vtmsc makeMSinit];
+                    [vtmsc addDecompStream:stream1];
+                    [vtmsc addDecompStream:stream2];
+                    [vtmsc makeRecomp];
+                    
+                }
+                
+                
+                
+                
+            }
+
+            {
+                NSString * writerOutputPath = [videoOverlaySrcPath1 stringByDeletingLastPathComponent];
+                NSString * name = [NSString stringWithFormat:@"%d_%d_%d_MSComplement.mov",rows,cols,1];
+                writerOutputPath = [writerOutputPath  stringByAppendingPathComponent:name];
+                [[NSFileManager defaultManager] removeItemAtPath:writerOutputPath error:nil];
+                NSURL * writerOutputURL = [NSURL fileURLWithPath:writerOutputPath];
+                
+                
+                NSString * picname = [NSString stringWithFormat:@"chess_layout_%d_multiply_%d_mode_%d.png",rows,cols,1];
+                
+                
+                VTMSDecomp  * stream1 = [[VTMSDecomp alloc] init];
+                {
+                    [stream1 resetParameters];
+                    stream1.sourceVideoURL = videoOverlaySrcURL1;
+                    stream1.useOnlyDurations = NO;
+                    stream1.useCacheArray = YES;
+                    stream1.cacheArraySize = 2;
+                    stream1.constructDestinationImageBufferAttributesFromKeyValue = YES;
+                    stream1.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+                }
+                
+                VTMSDecomp  * stream2 = [[VTMSDecomp alloc] init];
+                {
+                    [stream2 resetParameters];
+                    stream2.sourceVideoURL = videoOverlaySrcURL2;
+                    stream2.useOnlyDurations = NO;
+                    stream2.useCacheArray = YES;
+                    stream2.cacheArraySize = 2;
+                    stream2.constructDestinationImageBufferAttributesFromKeyValue = YES;
+                    stream2.destinationImageBufferKCVPixelFormatType = kCVPixelFormatType_32BGRA;
+                }
+                
+                VTMSComp * vtmsc = [[VTMSComp alloc] init];
+                {
+                    [vtmsc resetParameters];
+                    vtmsc.writerOutputURL = writerOutputURL;
+                    vtmsc.writerOutputFileType = AVFileTypeQuickTimeMovie;
+                    vtmsc.compressionSessionPropertiesConstructFromKeyValue =YES;
+                    vtmsc.compressionAverageBitRate = 1280000;
+                    vtmsc.deleteOutputDirBeforeWrite = YES;
+                    vtmsc.writerShouldOptimizeForNetworkUse = YES;
+                    vtmsc.compSessionWidth = 1280.0;
+                    vtmsc.compSessionHeight = 720.0;
+                    GPUImageMSComplement * MSComplement = [[GPUImageMSComplement alloc] init];
+                    [MSComplement useNextFrameForImageCapture];
+                    MSComplement.mode = @"refpic";
+                    GPUImagePicture * refpic = [[GPUImagePicture alloc] initWithImage:[UIImage imageNamed:picname]];
+                    [refpic addTarget:MSComplement atTextureLocation:2];
+                    [refpic processImage];
+                    [MSComplement useNextFrameForImageCapture];
+                    vtmsc.initedFilter = MSComplement;
+                    vtmsc.applyFilter  = YES;
+                    vtmsc.SYNC = YES;
+                    [vtmsc makeMSinit];
+                    [vtmsc addDecompStream:stream1];
+                    [vtmsc addDecompStream:stream2];
+                    [vtmsc makeRecomp];
+                    
+                }
+                
+                
+                
+                
+            }
+            
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+

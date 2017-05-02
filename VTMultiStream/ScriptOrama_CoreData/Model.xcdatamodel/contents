@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9057" systemVersion="14F27" minimumToolsVersion="Xcode 7.0">
+    <entity name="CDAudioSceneMusicObject" representedClassName="CDAudioSceneMusicObject" syncable="YES">
+        <attribute name="animationDuration" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="animationStartTime" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="duration" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="mixMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="musicURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="timeFillingMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="timeTrimingMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="volumeRatio" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="volumeSumWithOriginalVolume" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="scene" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDSceneObject" inverseName="musicPostBGIntergration" inverseEntity="CDSceneObject" syncable="YES"/>
+    </entity>
+    <entity name="CDSceneObject" representedClassName="CDSceneObject" syncable="YES">
+        <attribute name="anchorOnSelfXpostLowerThird" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="anchorOnSelfYpostLowerThird" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="averageBitRateForCompressing" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="backgroundSizeX" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="backgroundSizeY" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="bgImageURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="categoryId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="compositionMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="coverImgUrl" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="creatorId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="demoVideoUrl" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="descs" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="editMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="expectedTotalDuration" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="filterPostCompositionDuration" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="filterPostCompositionExist" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="filterPostCompositionName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="filterPostCompositionStartTime" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="finalOutputCGsizeX" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="finalOutputCGsizeY" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="geomTransformPostLowerThirdExist" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="interleaveInterval" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="interleaveMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lowerThirdPostOverlayExist" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="musicPostBackgroundIntergrationExist" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="objectId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="overlayPostCompositionFilterExist" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="postBGTempURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="rotationDegreePostLowerThird" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="sizeXpostLowerThird" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="sizeYpostLowerThird" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="textOverBackgroundExist" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="titlesExist" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="transitionModes" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="transitionSectionDurations" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="videoCount" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="xOnBGPostLowerThird" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="yOnBGPostLowerThird" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="lowerThirdPostOverlay" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoLowerThirdObject" inverseName="scene" inverseEntity="CDVideoLowerThirdObject" syncable="YES"/>
+        <relationship name="musicPostBGIntergration" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDAudioSceneMusicObject" inverseName="scene" inverseEntity="CDAudioSceneMusicObject" syncable="YES"/>
+        <relationship name="overlayPostCompositionFilter" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoOverlayObject" inverseName="scene" inverseEntity="CDVideoOverlayObject" syncable="YES"/>
+        <relationship name="tail" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoTailObject" inverseName="scene" inverseEntity="CDVideoTailObject" syncable="YES"/>
+        <relationship name="task" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDTaskObject" inverseName="scene" inverseEntity="CDTaskObject" syncable="YES"/>
+        <relationship name="textOverBG" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoTextOverBackGroundObject" inverseName="scene" inverseEntity="CDVideoTextOverBackGroundObject" syncable="YES"/>
+        <relationship name="titles" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoTitlesObject" inverseName="scene" inverseEntity="CDVideoTitlesObject" syncable="YES"/>
+    </entity>
+    <entity name="CDTaskObject" representedClassName="CDTaskObject" syncable="YES">
+        <attribute name="datetime" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="descs" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="objectId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="videoCount" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <relationship name="scene" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDSceneObject" inverseName="task" inverseEntity="CDSceneObject" syncable="YES"/>
+        <relationship name="starter" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDUserObject" inverseName="task" inverseEntity="CDUserObject" syncable="YES"/>
+        <relationship name="videos" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="CDVideoObject" inverseName="task" inverseEntity="CDVideoObject" syncable="YES"/>
+    </entity>
+    <entity name="CDUserObject" representedClassName="CDUserObject" syncable="YES">
+        <attribute name="avatarUri" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="bgUrl" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="geo" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="isFollower" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="objectId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="petName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="sex" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="signature" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="username" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="task" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDTaskObject" inverseName="starter" inverseEntity="CDTaskObject" syncable="YES"/>
+    </entity>
+    <entity name="CDVideoLocalRenderObject" representedClassName="CDVideoLocalRenderObject" syncable="YES">
+        <attribute name="cropPositionOnOriginalMaterialX" optional="YES" attributeType="Float" defaultValueString="0" syncable="YES"/>
+        <attribute name="cropPositionOnOriginalMaterialY" optional="YES" attributeType="Float" defaultValueString="0" syncable="YES"/>
+        <attribute name="cropSizeX" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="cropSizeY" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="duration" optional="YES" attributeType="Float" defaultValueString="0" syncable="YES"/>
+        <attribute name="filter" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="origAudioWorkDirURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="origFromAlbumAudioWorkDirURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="origFromAlbumURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="origFromAlbumVideoWorkDirURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="origThumbnailURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="origURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="origVideoWorkDirURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="postCuttingAudioWorkDirURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="postCuttingThumbnailURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="postCuttingURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="postCuttingVideoWorkDirURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="postFilteringAudioWorkDirURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="postFilteringThumbnailURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="postFilteringURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="postFilteringVideoWorkDirURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="postRenderSizeX" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="postRenderSizeY" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="postRenderTempSavingURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="savePostCutting" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="savePostFiltering" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Float" defaultValueString="0" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="timeStampInScene" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="video" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoObject" inverseName="videoLocalRender" inverseEntity="CDVideoObject" syncable="YES"/>
+        <relationship name="videoOverlay" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoOverlayObject" inverseName="videoLocalRender" inverseEntity="CDVideoOverlayObject" syncable="YES"/>
+    </entity>
+    <entity name="CDVideoLowerThirdObject" representedClassName="CDVideoLowerThirdObject" syncable="YES">
+        <attribute name="bgImageURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="duration" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontColorA" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontColorB" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontColorG" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontColorR" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontFamily" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fontSize" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="height" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="petName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="width" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="xOnVideo" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="yOnVideo" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="scene" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDSceneObject" inverseName="lowerThirdPostOverlay" inverseEntity="CDSceneObject" syncable="YES"/>
+    </entity>
+    <entity name="CDVideoObject" representedClassName="CDVideoObject" syncable="YES">
+        <attribute name="effct" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="endTime" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="height" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="isMagic" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isTask" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isUploaded" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="length" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="makerId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="order" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="sourceType" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="videoId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="width" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <relationship name="task" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDTaskObject" inverseName="videos" inverseEntity="CDTaskObject" syncable="YES"/>
+        <relationship name="videoLocalRender" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoLocalRenderObject" inverseName="video" inverseEntity="CDVideoLocalRenderObject" syncable="YES"/>
+    </entity>
+    <entity name="CDVideoOverlayObject" representedClassName="CDVideoOverlayObject" syncable="YES">
+        <attribute name="absoluteURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="blendMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="duration" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="exist" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="height" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="movingPathCGpointXs" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="movingPathCGpointYs" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="movingSectionDurations" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="timeFillingMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="timeTrimingMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="width" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="scene" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDSceneObject" inverseName="overlayPostCompositionFilter" inverseEntity="CDSceneObject" syncable="YES"/>
+        <relationship name="videoLocalRender" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVideoLocalRenderObject" inverseName="videoOverlay" inverseEntity="CDVideoLocalRenderObject" syncable="YES"/>
+    </entity>
+    <entity name="CDVideoTailObject" representedClassName="CDVideoTailObject" syncable="YES">
+        <attribute name="duration" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="height" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="mode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="tailURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="timeFillingMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="timeTrimingMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="width" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="scene" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDSceneObject" inverseName="tail" inverseEntity="CDSceneObject" syncable="YES"/>
+    </entity>
+    <entity name="CDVideoTextOverBackGroundObject" representedClassName="CDVideoTextOverBackGroundObject" syncable="YES">
+        <attribute name="animationMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fontColorA" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontColorB" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontColorG" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontColorR" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="fontFamily" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fontSize" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="height" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="showStage" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="width" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="xOnBG" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="yOnBG" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="scene" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDSceneObject" inverseName="textOverBG" inverseEntity="CDSceneObject" syncable="YES"/>
+    </entity>
+    <entity name="CDVideoTitlesObject" representedClassName="CDVideoTitlesObject" syncable="YES">
+        <attribute name="duration" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="height" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="parentHashID" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="timeFillingMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="timeTrimingMode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="titlesURLstring" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="width" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="scene" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDSceneObject" inverseName="titles" inverseEntity="CDSceneObject" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="CDAudioSceneMusicObject" positionX="-3825" positionY="207" width="180" height="238"/>
+        <element name="CDSceneObject" positionX="-3960" positionY="210" width="128" height="763"/>
+        <element name="CDTaskObject" positionX="-4232" positionY="468" width="128" height="163"/>
+        <element name="CDUserObject" positionX="-4095" positionY="708" width="128" height="223"/>
+        <element name="CDVideoLocalRenderObject" positionX="-3240" positionY="549" width="261" height="525"/>
+        <element name="CDVideoLowerThirdObject" positionX="-3636" positionY="162" width="216" height="298"/>
+        <element name="CDVideoObject" positionX="-2943" positionY="762" width="128" height="298"/>
+        <element name="CDVideoOverlayObject" positionX="-3438" positionY="549" width="128" height="298"/>
+        <element name="CDVideoTailObject" positionX="-3096" positionY="351" width="128" height="208"/>
+        <element name="CDVideoTextOverBackGroundObject" positionX="-3357" positionY="192" width="243" height="298"/>
+        <element name="CDVideoTitlesObject" positionX="-3737" positionY="522" width="128" height="193"/>
+    </elements>
+</model>
