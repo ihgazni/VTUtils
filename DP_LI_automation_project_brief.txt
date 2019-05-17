@@ -1,0 +1,92 @@
+﻿AUTOMATION:
+-----------
+
+    1. JAVASCRIPT:
+    
+        https://github.com/ihgazni2/nueve
+        
+            - webgl shader  testing  tool
+            - to test multi-webgl-shader running at the same time performance
+            - effects:  
+              https://github.com/ihgazni2/nueve/blob/master/README.md
+        
+        
+        https://github.com/ihgazni2/xexif
+            - image exif tool
+        https://github.com/ihgazni2/es2xml
+            - javascript code/AST tool
+        https://github.com/ihgazni2/neggen
+            - layout testing tool
+
+    2.  PYTHON:
+    
+        https://github.com/ihgazni2/nvhtml
+            - HTML tool
+        https://github.com/ihgazni2/nvhead
+            - HTTP tool
+        https://github.com/ihgazni2/tytycss
+            - CSS tool
+        https://github.com/ihgazni2/xxurl
+            - URL tool
+        https://github.com/ihgazni2/kukibanshee
+            - COOKIE tool
+        https://github.com/ihgazni2/navegador5
+            - crawler tool
+        https://github.com/ihgazni2/edict
+            - DICT tool
+        https://github.com/ihgazni2/elist
+            - LIST tool
+        https://github.com/ihgazni2/rblk
+        https://github.com/ihgazni2/string-painter
+        https://github.com/ihgazni2/estring
+        https://github.com/ihgazni2/sledgehammer4nut
+            - string-toolset
+        https://github.com/ihgazni2/qtable
+        https://github.com/ihgazni2/tlist
+        https://github.com/ihgazni2/dlist
+        https://github.com/ihgazni2/ltdict
+        https://github.com/ihgazni2/dtable
+            - data-structure tool
+        https://github.com/ihgazni2/efdir
+        https://github.com/ihgazni2/minidoc
+            - doc tool
+        https://github.com/ihgazni2/conjugar
+           - language tool
+
+
+
+
+
+IMAGE AND VIDEO:
+----------------
+
+    1. https://github.com/ihgazni/VTUtils
+    
+        - obj-C
+        - multi-stream video framework 
+        - effect  examples:
+       
+            https://github.com/ihgazni/VTUtils/blob/master/tracks_after_merge_5.m4v
+            https://github.com/ihgazni/VTUtils/blob/master/9_2_0_MSComplement.mov
+            https://github.com/ihgazni/VTUtils/blob/master/ellipse.mov
+
+
+
+
+
+
+
+MORE PROJECTS:
+-------------
+
+    - https://github.com/ihgazni2
+    - https://www.linkedin.com/in/dapeng-li-a02b9376/
+    - https://github.com/ihgazni
+        
+
+
+
+        
+
+             
+
